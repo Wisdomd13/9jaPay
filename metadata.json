@@ -1,0 +1,6 @@
+{
+  "name": "9jaPay",
+  "description": "Online earning and task platform with Watch & Earn, Daily Quiz Challenges, Click & Earn, Referrals, Loans, and Premium Upgrades.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
