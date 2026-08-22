@@ -354,5 +354,62 @@ export const supabaseDb = {
   recordTransaction,
   fetchAllTasks,
   saveTaskToSupabase,
-  deleteTaskFromSupabase
+  deleteTaskFromSupabase,
+  
+  // Real Admin Support Methods
+  fetchAllUsers: async (): Promise<UserProfile[]> => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase.from('profiles').select('*').order('created_at', { ascending: false });
+        if (data && data.length > 0 && !error) {
+          return data.map((d: DbProfile) => ({
+            id: d.id,
+            fullName: `${d.first_name || ''} ${d.last_name || ''}`.trim() || d.email.split('@')[0],
+            username: d.email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') || 'member',
+            email: d.email,
+            phone: d.phone || '+2348000000000',
+            tier: (d.plan === 'PREMIUM' ? 'PREMIUM' : 'FREE') as MembershipTier,
+            walletBalance: Number(d.balance) || 0,
+            totalEarned: Number(d.balance) || 0,
+            tasksCompleted: 0,
+            referralsCount: Number(d.total_referrals) || 0,
+            vipReferralsCount: Number(d.premium_referrals) || 0,
+            referralCode: (d.email.split('@')[0] || 'REF').toUpperCase(),
+            loanBalance: 0,
+            loanLimit: d.plan === 'PREMIUM' ? 50000 : 20000,
+            createdAt: d.created_at || new Date().toISOString(),
+            upgradeStatus: d.plan === 'PREMIUM' ? 'APPROVED' : 'NONE',
+            status: 'ACTIVE'
+          }));
+        }
+      } catch (err) {
+        console.warn('[Supabase] fetchAllUsers query failed:', err);
+      }
+    }
+    return [];
+  },
+
+  fetchAllWithdrawals: async (): Promise<WithdrawalRequest[]> => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase.from('transactions').select('*').eq('type', 'WITHDRAWAL').order('created_at', { ascending: false });
+        if (data && data.length > 0 && !error) {
+          return data.map((tx: DbTransaction) => ({
+            id: tx.id,
+            userId: tx.user_id,
+            amount: Number(tx.amount) || 0,
+            bankName: 'Nigerian Commercial Bank',
+            accountNumber: 'NUBAN-Account',
+            accountName: 'Verified Member',
+            status: (tx.status === 'COMPLETED' ? 'COMPLETED' : tx.status === 'FAILED' ? 'REJECTED' : 'PENDING') as any,
+            requestedAt: tx.created_at,
+            reference: tx.reference
+          }));
+        }
+      } catch (err) {
+        console.warn('[Supabase] fetchAllWithdrawals query failed:', err);
+      }
+    }
+    return [];
+  }
 };

@@ -1,5 +1,6 @@
-import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { UserProfile } from '../types';
+import { User } from '@supabase/supabase-js';
+import { supabase as clientInstance, SUPABASE_URL, SUPABASE_PUBLIC_KEY } from '../supabaseClient';
 
 /**
  * Sanitizes and validates the Supabase URL:
@@ -43,37 +44,10 @@ export function sanitizeAnonKey(key?: string): string {
   return key.trim();
 }
 
-const rawUrl = import.meta.env.VITE_SUPABASE_URL;
-const rawAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-export const supabaseUrl: string = sanitizeSupabaseUrl(rawUrl);
-export const supabaseAnonKey: string = sanitizeAnonKey(rawAnonKey);
-
-export const isSupabaseConfigured: boolean = Boolean(
-  rawUrl &&
-  typeof rawUrl === 'string' &&
-  rawUrl.trim() !== '' &&
-  !rawUrl.includes('placeholder') &&
-  !rawUrl.includes('YOUR_SUPABASE') &&
-  rawAnonKey &&
-  typeof rawAnonKey === 'string' &&
-  rawAnonKey.trim() !== '' &&
-  !rawAnonKey.includes('placeholder')
-);
-
-// Standard Supabase client instantiation with clean sanitized URL & standard options
-export const supabase: SupabaseClient = createClient(
-  supabaseUrl,
-  supabaseAnonKey,
-  {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
-    }
-  }
-);
+export const supabaseUrl: string = SUPABASE_URL;
+export const supabaseAnonKey: string = SUPABASE_PUBLIC_KEY;
+export const isSupabaseConfigured: boolean = true;
+export const supabase = clientInstance;
 
 /**
  * Transforms a Supabase User object into a 9jaPay UserProfile

@@ -64,18 +64,86 @@ export default function App() {
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [prefilledRef, setPrefilledRef] = useState('');
 
-  // Supabase Session Management & Auth State Listener
+  // Supabase Session Management & Protected Route Guard
   useEffect(() => {
-    // 1. Initial Session Check
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      if (session?.user && !error) {
-        setUser(prev => mapSupabaseUserToProfile(session.user, prev));
-      }
-    }).catch(() => {
-      // Graceful fallback if offline or unconfigured
-    });
+    const checkSessionAndRoute = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        const pathname = typeof window !== 'undefined' ? window.location.pathname.toLowerCase() : '/';
 
-    // 2. Real-time Auth State Change Listener
+        if (pathname === '/login') {
+          if (session?.user && !error) {
+            setUser(prev => mapSupabaseUserToProfile(session.user, prev));
+            setActiveTab('dashboard');
+            window.history.replaceState({}, '', '/');
+          } else {
+            setUser(null);
+            setActiveTab('landing');
+            setAuthMode('login');
+            setIsAuthOpen(true);
+          }
+          return;
+        }
+
+        if (pathname === '/register' || pathname === '/signup') {
+          if (session?.user && !error) {
+            setUser(prev => mapSupabaseUserToProfile(session.user, prev));
+            setActiveTab('dashboard');
+            window.history.replaceState({}, '', '/');
+          } else {
+            setUser(null);
+            setActiveTab('landing');
+            setAuthMode('register');
+            setIsAuthOpen(true);
+          }
+          return;
+        }
+
+        const protectedTabs: Record<string, string> = {
+          '/dashboard': 'dashboard',
+          '/videos': 'videos',
+          '/quiz': 'quiz',
+          '/socials': 'socials',
+          '/referral': 'referral',
+          '/history': 'history',
+        };
+
+        const targetTab = protectedTabs[pathname];
+
+        if (targetTab) {
+          // Protected route check with supabase.auth.getSession()
+          if (!session?.user || error) {
+            // if no session, redirect to /login
+            setUser(null);
+            localStorage.removeItem('9japay_user');
+            setActiveTab('landing');
+            setAuthMode('login');
+            setIsAuthOpen(true);
+            window.history.replaceState({}, '', '/login');
+          } else {
+            setUser(prev => mapSupabaseUserToProfile(session.user, prev));
+            setActiveTab(targetTab);
+          }
+          return;
+        }
+
+        // Standard root path '/'
+        if (session?.user && !error) {
+          setUser(prev => mapSupabaseUserToProfile(session.user, prev));
+          setActiveTab('dashboard');
+        } else {
+          setUser(null);
+          setActiveTab('landing');
+        }
+      } catch {
+        setUser(null);
+        setActiveTab('landing');
+      }
+    };
+
+    checkSessionAndRoute();
+
+    // Real-time Auth State Change Listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         setUser(prev => mapSupabaseUserToProfile(session.user, prev));
@@ -84,13 +152,64 @@ export default function App() {
         localStorage.removeItem('9japay_user');
         localStorage.removeItem('9japay_admin_token');
         setActiveTab('landing');
+        if (typeof window !== 'undefined') {
+          window.history.pushState({}, '', '/login');
+        }
       }
     });
 
+    // Browser Back/Forward navigation listener
+    const handlePopState = () => {
+      checkSessionAndRoute();
+    };
+    window.addEventListener('popstate', handlePopState);
+
     return () => {
       subscription?.unsubscribe();
+      window.removeEventListener('popstate', handlePopState);
     };
   }, []);
+
+  // Protected Tab Navigation with supabase.auth.getSession() check
+  const handleSelectTab = async (tabId: string) => {
+    if (tabId === 'landing') {
+      setActiveTab('landing');
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', '/');
+      }
+      return;
+    }
+
+    try {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (!session?.user || error) {
+        // If no session, redirect to /login
+        setUser(null);
+        localStorage.removeItem('9japay_user');
+        setActiveTab('landing');
+        setAuthMode('login');
+        setIsAuthOpen(true);
+        if (typeof window !== 'undefined') {
+          window.history.pushState({}, '', '/login');
+        }
+        return;
+      }
+
+      setUser(prev => mapSupabaseUserToProfile(session.user, prev));
+      setActiveTab(tabId);
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', tabId === 'dashboard' ? '/' : `/${tabId}`);
+      }
+    } catch {
+      setUser(null);
+      setActiveTab('landing');
+      setAuthMode('login');
+      setIsAuthOpen(true);
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', '/login');
+      }
+    }
+  };
 
   // Persist user
   useEffect(() => {
@@ -490,10 +609,24 @@ export default function App() {
     }
   };
 
-  // Open Auth Modal
+  // Open Auth Modal with route update
   const handleOpenAuth = (mode: 'login' | 'register') => {
     setAuthMode(mode);
     setIsAuthOpen(true);
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', mode === 'login' ? '/login' : '/register');
+    }
+  };
+
+  // Close Auth Modal
+  const handleCloseAuth = () => {
+    setIsAuthOpen(false);
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname.toLowerCase();
+      if (pathname === '/login' || pathname === '/register' || pathname === '/signup') {
+        window.history.pushState({}, '', '/');
+      }
+    }
   };
 
   // Logout via Supabase Client
@@ -508,6 +641,9 @@ export default function App() {
     localStorage.removeItem('9japay_user');
     localStorage.removeItem('9japay_admin_token');
     setActiveTab('landing');
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '/login');
+    }
   };
 
   return (
@@ -522,7 +658,7 @@ export default function App() {
         onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleSelectTab}
       />
 
       {/* Main Content Body */}
@@ -546,7 +682,7 @@ export default function App() {
                 onOpenWithdraw={() => setIsWithdrawOpen(true)}
                 onOpenUpgrade={() => setIsUpgradeOpen(true)}
                 onOpenLoan={() => setIsLoanOpen(true)}
-                onSelectTab={setActiveTab}
+                onSelectTab={handleSelectTab}
                 onCompleteTask={handleCompleteTask}
                 onSubmitQuiz={handleSubmitQuiz}
               />
@@ -619,7 +755,7 @@ export default function App() {
       <BottomNav
         user={user}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleSelectTab}
         onOpenAuth={handleOpenAuth}
       />
 
@@ -661,11 +797,14 @@ export default function App() {
 
       <AuthModal
         isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
+        onClose={handleCloseAuth}
         initialMode={authMode}
         onLoginSuccess={(loggedInUser) => {
           setUser(loggedInUser);
           setActiveTab('dashboard');
+          if (typeof window !== 'undefined') {
+            window.history.pushState({}, '', '/');
+          }
         }}
         prefilledRef={prefilledRef}
       />

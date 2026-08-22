@@ -19,7 +19,7 @@ import {
 import confetti from 'canvas-confetti';
 import { soundManager } from '../utils/audio';
 import { NineJaPayLogo } from './NineJaPayLogo';
-import { supabase, isSupabaseConfigured, mapSupabaseUserToProfile } from '../lib/supabase';
+import { supabase } from '../supabaseClient';
 import { getOrCreateProfile } from '../lib/supabaseDb';
 
 interface AuthModalProps {
@@ -54,6 +54,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [createdUser, setCreatedUser] = useState<UserProfile | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
 
@@ -112,33 +114,33 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsLoading(true);
 
     try {
-      if (isSupabaseConfigured) {
-        // 1. SIMPLIFIED SUPABASE SIGNUP CALL (Clean metadata, no emailRedirectTo or custom paths)
-        const { data, error } = await supabase.auth.signUp({
-          email: trimmedEmail,
-          password: password,
-          options: {
-            data: {
-              first_name: trimmedFirst,
-              last_name: trimmedLast,
-              phone: trimmedPhone,
-              plan: 'FREE',
-              balance: 0
-            }
+      // 1) Sign Up using Supabase Auth with redirect and metadata
+      const { data, error } = await supabase.auth.signUp({
+        email: trimmedEmail,
+        password: password,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined,
+          data: {
+            first_name: trimmedFirst,
+            last_name: trimmedLast,
+            phone: trimmedPhone,
+            full_name: fullName,
+            username: autoUsername.toLowerCase(),
           }
-        });
-
-        // 3. ERROR DISPLAY: Render error.message directly in error banner
-        if (error) {
-          setErrorMsg(error.message);
-          setIsLoading(false);
-          return;
         }
+      });
 
-        // 2. POST-SIGNUP LOGIC: Automatically set active user in React & close modal
-        let registeredUser: UserProfile;
-        if (data?.user) {
-          registeredUser = await getOrCreateProfile(data.user.id, trimmedEmail, {
+      // If Supabase returns an error, show a small error message under the form
+      if (error) {
+        setErrorMsg(error.message);
+        setIsLoading(false);
+        return;
+      }
+
+      // Pre-seed profile in background if user id exists
+      if (data?.user) {
+        try {
+          await getOrCreateProfile(data.user.id, trimmedEmail, {
             first_name: trimmedFirst,
             last_name: trimmedLast,
             phone: trimmedPhone,
@@ -146,80 +148,65 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             username: autoUsername.toLowerCase(),
             referral_code: referralCode ? referralCode.trim().toUpperCase() : undefined
           });
-        } else {
-          registeredUser = {
-            id: `sb_${Date.now()}`,
-            fullName,
-            username: autoUsername,
-            email: trimmedEmail,
-            phone: trimmedPhone || '+234 812 000 0000',
-            tier: 'FREE',
-            walletBalance: 0,
-            totalEarned: 0,
-            tasksCompleted: 0,
-            referralsCount: 0,
-            referralCode: (referralCode || autoUsername).toUpperCase(),
-            loanBalance: 0,
-            loanLimit: 20000,
-            bankDetails: {
-              bankName: 'OPay (PayCom)',
-              accountNumber: '',
-              accountName: fullName
-            },
-            createdAt: new Date().toISOString(),
-            upgradeStatus: 'NONE'
-          };
+        } catch {
+          // Non-blocking profile initialization
         }
+      }
 
-        soundManager.playSuccessSound();
-        confetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.55 }
-        });
+      // 1) After a successful Supabase signUp:
+      // - Do NOT auto-login.
+      // - Redirect the user to the Sign In page with email prefilled & a clear success notice.
+      setIsLoading(false);
+      setErrorMsg('');
+      setInfoMsg('Account created! Check your email (including Spam/Junk folder) and confirm your account before logging in.');
+      setEmail(trimmedEmail);
+      setPassword('');
+      setConfirmPassword('');
+      setMode('login');
 
-        onLoginSuccess(registeredUser);
-        onClose();
-      } else {
-        // Standby / Demo mode when Supabase credentials are not yet configured in environment
-        const demoUser: UserProfile = {
-          id: `sb_${Date.now()}`,
-          fullName,
-          username: autoUsername,
-          email: trimmedEmail,
-          phone: trimmedPhone || '+234 812 000 0000',
-          tier: 'FREE',
-          walletBalance: 0,
-          totalEarned: 0,
-          tasksCompleted: 0,
-          referralsCount: 0,
-          referralCode: (referralCode || autoUsername).toUpperCase(),
-          loanBalance: 0,
-          loanLimit: 20000,
-          bankDetails: {
-            bankName: 'OPay (PayCom)',
-            accountNumber: '',
-            accountName: fullName
-          },
-          createdAt: new Date().toISOString(),
-          upgradeStatus: 'NONE'
-        };
+      soundManager.playSuccessSound();
 
-        soundManager.playSuccessSound();
-        confetti({
-          particleCount: 120,
-          spread: 80,
-          origin: { y: 0.55 }
-        });
-
-        onLoginSuccess(demoUser);
-        onClose();
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', '/login');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed. Please check your connection and details.';
       setErrorMsg(msg);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleResendConfirmation = async () => {
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !trimmedEmail.includes('@')) {
+      setErrorMsg('Please enter a valid email address to resend confirmation.');
+      return;
+    }
+
+    setIsResending(true);
+    setErrorMsg('');
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: trimmedEmail,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined
+        }
+      });
+
+      if (error) {
+        setErrorMsg(error.message);
+      } else {
+        setResendSuccess(true);
+        setInfoMsg(`Confirmation email resent to ${trimmedEmail}! Check your inbox and spam folder.`);
+        setTimeout(() => setResendSuccess(false), 8000);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to resend confirmation email.';
+      setErrorMsg(msg);
+    } finally {
+      setIsResending(false);
     }
   };
 
@@ -244,54 +231,43 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsLoading(true);
 
     try {
-      if (isSupabaseConfigured) {
-        // Direct Supabase Client-Side Sign In with Email & Password
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: trimmedEmail,
-          password: trimmedPassword,
-        });
+      // 2) Sign In using Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: trimmedEmail,
+        password: trimmedPassword,
+      });
 
-        if (error) {
-          if (error.message.toLowerCase().includes('invalid login credentials')) {
-            throw new Error('Invalid email or password. Please check your credentials or create a new account.');
-          } else if (error.message.toLowerCase().includes('email not confirmed')) {
-            throw new Error('Please verify your email address before signing in, or try logging in again.');
-          }
-          throw new Error(error.message || 'Could not sign in. Please verify your credentials.');
-        }
+      // 4) If Supabase returns an error, show a small error message under the form
+      if (error) {
+        setErrorMsg(error.message);
+        setIsLoading(false);
+        return;
+      }
 
-        if (!data?.user) {
-          throw new Error('User session not found. Please try again.');
-        }
+      // Only redirect when a real session exists after login
+      if (!data?.session || !data?.user) {
+        setErrorMsg('Check your email and confirm your account before logging in.');
+        setIsLoading(false);
+        return;
+      }
 
-        const loggedInUser = await getOrCreateProfile(
+      const prefix = trimmedEmail.split('@')[0];
+      const isOwner = trimmedEmail === 'soundguy300@gmail.com' || trimmedEmail === 'admin@9japay.com.ng';
+      let loggedInUser: UserProfile;
+
+      try {
+        loggedInUser = await getOrCreateProfile(
           data.user.id,
           trimmedEmail,
           data.user.user_metadata
         );
-
-        if (
-          data.user.email === 'soundguy300@gmail.com' ||
-          data.user.email === 'admin@9japay.com.ng' ||
-          data.user.user_metadata?.username === 'admin' ||
-          loggedInUser.tier === 'PREMIUM'
-        ) {
-          localStorage.setItem('9japay_admin_token', '9ja-admin-authenticated-token');
-        }
-
-        soundManager.playSuccessSound();
-        onLoginSuccess(loggedInUser);
-        onClose();
-      } else {
-        // Fallback login when Supabase credentials are not yet configured in environment
-        const prefix = trimmedEmail.split('@')[0];
-        const isOwner = trimmedEmail === 'soundguy300@gmail.com' || trimmedEmail === 'admin@9japay.com.ng';
-        const fallbackUser: UserProfile = {
-          id: `sb_user_${prefix}`,
-          fullName: prefix.charAt(0).toUpperCase() + prefix.slice(1),
-          username: prefix,
+      } catch {
+        loggedInUser = {
+          id: data.user.id,
+          fullName: data.user.user_metadata?.full_name || (prefix.charAt(0).toUpperCase() + prefix.slice(1)),
+          username: data.user.user_metadata?.username || prefix,
           email: trimmedEmail,
-          phone: '+234 812 000 0000',
+          phone: data.user.user_metadata?.phone || '+234 812 000 0000',
           tier: isOwner ? 'PREMIUM' : 'FREE',
           walletBalance: isOwner ? 120000 : 0,
           totalEarned: isOwner ? 120000 : 0,
@@ -310,14 +286,24 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           upgradeStatus: isOwner ? 'APPROVED' : 'NONE',
           status: 'ACTIVE'
         };
+      }
 
-        if (isOwner) {
-          localStorage.setItem('9japay_admin_token', '9ja-admin-authenticated-token');
-        }
+      if (
+        data.user.email === 'soundguy300@gmail.com' ||
+        data.user.email === 'admin@9japay.com.ng' ||
+        data.user.user_metadata?.username === 'admin' ||
+        loggedInUser.tier === 'PREMIUM'
+      ) {
+        localStorage.setItem('9japay_admin_token', '9ja-admin-authenticated-token');
+      }
 
-        soundManager.playSuccessSound();
-        onLoginSuccess(fallbackUser);
-        onClose();
+      soundManager.playSuccessSound();
+      onLoginSuccess(loggedInUser);
+      onClose();
+
+      // 3) Redirect user to Home page ("/")
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', '/');
       }
     } catch (err: unknown) {
       console.error('[Supabase Auth SignIn Error]:', err);
@@ -615,6 +601,22 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </button>
 
+                {/* Info Message Under Form (e.g. Email confirmation notice) */}
+                {infoMsg && (
+                  <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-300 flex items-start gap-2.5 animate-fadeIn leading-relaxed text-left">
+                    <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                    <span className="font-semibold">{infoMsg}</span>
+                  </div>
+                )}
+
+                {/* Error Message Under Form */}
+                {errorMsg && (
+                  <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-center justify-center gap-1.5 animate-fadeIn">
+                    <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
+
                 {/* Switch to Login */}
                 <div className="text-center pt-2">
                   <p className="text-xs text-[#A8B5AB]">
@@ -637,6 +639,27 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ) : (
               /* LOGIN FORM */
               <form onSubmit={handleLogin} className="space-y-4">
+                {/* Prominent Success / Info Banner */}
+                {infoMsg && (
+                  <div className="p-3.5 rounded-xl bg-[#7CFF00]/10 border border-[#7CFF00]/30 text-xs text-[#7CFF00] space-y-2 animate-fadeIn text-left">
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-[#7CFF00] flex-shrink-0 mt-0.5" />
+                      <span className="leading-relaxed font-medium">{infoMsg}</span>
+                    </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-[#7CFF00]/20 text-[11px]">
+                      <span className="text-[#A8B5AB]">No email in inbox or spam?</span>
+                      <button
+                        type="button"
+                        onClick={handleResendConfirmation}
+                        disabled={isResending || resendSuccess}
+                        className="text-[#7CFF00] font-bold hover:underline disabled:opacity-50 cursor-pointer"
+                      >
+                        {isResending ? 'Resending...' : resendSuccess ? '✓ Email Sent' : 'Resend Link'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-[10px] sm:text-[11px] font-bold text-[#A8B5AB] uppercase tracking-widest mb-1.5">
                     REGISTERED EMAIL ADDRESS
@@ -695,6 +718,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                     </>
                   )}
                 </button>
+
+                {/* Error Message Under Form */}
+                {errorMsg && (
+                  <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-center justify-center gap-1.5 animate-fadeIn">
+                    <AlertCircle className="w-3.5 h-3.5 text-red-400 flex-shrink-0" />
+                    <span>{errorMsg}</span>
+                  </div>
+                )}
 
                 <div className="text-center pt-2">
                   <p className="text-xs text-[#A8B5AB]">
