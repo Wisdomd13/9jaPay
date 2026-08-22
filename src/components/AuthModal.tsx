@@ -114,7 +114,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
     try {
       if (isSupabaseConfigured) {
-        // Direct Supabase Client-Side Sign Up with options.data metadata
+        // Direct Supabase Client-Side Sign Up with standard clean payload
         const { data, error } = await supabase.auth.signUp({
           email: trimmedEmail,
           password: trimmedPassword,
@@ -134,10 +134,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
         if (error) {
           console.error('[Supabase Auth SignUp Error]:', error);
-          if (error.message.toLowerCase().includes('already registered')) {
+          const rawMsg = error.message || '';
+          if (rawMsg.toLowerCase().includes('already registered')) {
             throw new Error('An account with this email already exists. Please sign in instead.');
           }
-          throw new Error(error.message || 'Registration could not be completed. Please try again.');
+          throw new Error(rawMsg || 'Registration could not be completed. Please try again.');
         }
 
         if (data?.user) {
@@ -158,7 +159,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             origin: { y: 0.55 }
           });
         } else {
-          throw new Error('Registration completed, but session could not be established. Please try signing in.');
+          throw new Error('Registration completed. Please sign in with your email and password.');
         }
       } else {
         // Standby / Demo mode when Supabase keys are pending in environment
