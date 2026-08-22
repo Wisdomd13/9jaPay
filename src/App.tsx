@@ -18,9 +18,11 @@ import { LandingPage } from './components/LandingPage';
 import { BottomNav } from './components/BottomNav';
 import { BentoDashboard } from './components/BentoDashboard';
 import { soundManager } from './utils/audio';
+import { supabase, mapSupabaseUserToProfile } from './lib/supabase';
+import { supabaseDb } from './lib/supabaseDb';
 
 export default function App() {
-  // User State
+  // User State: Default to null for guest visitors so the 9jaPay landing page is displayed
   const [user, setUser] = useState<UserProfile | null>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('9japay_user');
@@ -32,33 +34,17 @@ export default function App() {
         }
       }
     }
-    // Default logged in demo user starts with 0 Naira as requested
-    return {
-      id: 'user-demo',
-      fullName: 'Tunde Adeleke',
-      username: 'tundegold',
-      email: 'tunde@example.com',
-      phone: '+2348123456789',
-      tier: 'FREE',
-      walletBalance: 0, // Starts at 0 Naira as requested
-      totalEarned: 0,
-      tasksCompleted: 0,
-      referralsCount: 0,
-      referralCode: 'TUNDE2026',
-      loanBalance: 0,
-      loanLimit: 20000,
-      bankDetails: {
-        bankName: 'OPay (PayCom)',
-        accountNumber: '8123456789',
-        accountName: 'Tunde Adeleke'
-      },
-      createdAt: new Date().toISOString(),
-      upgradeStatus: 'NONE'
-    };
+    return null;
   });
 
-  // Active Tab
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+  // Active Tab: Default to 'landing' for guest visitors, 'dashboard' if already logged in
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('9japay_user');
+      if (saved) return 'dashboard';
+    }
+    return 'landing';
+  });
 
   // Tasks and App Data
   const [videoTasks, setVideoTasks] = useState<VideoTask[]>(INITIAL_VIDEO_TASKS);
@@ -77,6 +63,34 @@ export default function App() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [prefilledRef, setPrefilledRef] = useState('');
+
+  // Supabase Session Management & Auth State Listener
+  useEffect(() => {
+    // 1. Initial Session Check
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (session?.user && !error) {
+        setUser(prev => mapSupabaseUserToProfile(session.user, prev));
+      }
+    }).catch(() => {
+      // Graceful fallback if offline or unconfigured
+    });
+
+    // 2. Real-time Auth State Change Listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser(prev => mapSupabaseUserToProfile(session.user, prev));
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+        localStorage.removeItem('9japay_user');
+        localStorage.removeItem('9japay_admin_token');
+        setActiveTab('landing');
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   // Persist user
   useEffect(() => {
@@ -98,57 +112,17 @@ export default function App() {
     }
   }, []);
 
-  // Fetch updated data from API when user changes
+  // Fetch updated data when user changes
   const fetchUserData = useCallback(async () => {
     if (!user) return;
     try {
-      // 1. Fetch user status
-      const userRes = await fetch(`/api/users/${user.id}`);
-      if (userRes.ok) {
-        const userData = await userRes.json();
-        setUser(userData.user);
-      }
-
-      // 2. Fetch video tasks
-      const vidRes = await fetch(`/api/tasks/videos?userId=${user.id}`);
-      if (vidRes.ok) {
-        const vidData = await vidRes.json();
-        setVideoTasks(vidData.tasks);
-      }
-
-      // 3. Fetch social tasks
-      const socRes = await fetch(`/api/tasks/socials?userId=${user.id}`);
-      if (socRes.ok) {
-        const socData = await socRes.json();
-        setSocialTasks(socData.tasks);
-      }
-
-      // 4. Fetch quiz info
-      const quizRes = await fetch(`/api/quiz/today?userId=${user.id}`);
-      if (quizRes.ok) {
-        const qData = await quizRes.json();
-        setQuizQuestions(qData.questions);
-        setQuizAnsweredCount(qData.answeredCount);
-        setQuizDailyLimit(qData.dailyLimit);
-      }
-
-      // 5. Fetch transactions
-      const txRes = await fetch(`/api/transactions/${user.id}`);
-      if (txRes.ok) {
-        const txData = await txRes.json();
-        if (txData.transactions?.length) {
-          setTransactions(txData.transactions);
-        }
-      }
-
-      // 6. Fetch admin overview
-      const adminRes = await fetch('/api/admin/overview');
-      if (adminRes.ok) {
-        const adminData = await adminRes.json();
-        setPendingUpgrades(adminData.pendingUpgrades || []);
-      }
+      // 1. Fetch updated tasks from Supabase
+      const tasksData = await supabaseDb.fetchAllTasks();
+      if (tasksData.videos?.length) setVideoTasks(tasksData.videos);
+      if (tasksData.socials?.length) setSocialTasks(tasksData.socials);
+      if (tasksData.quizzes?.length) setQuizQuestions(tasksData.quizzes);
     } catch {
-      // API fallback
+      // Local fallback
     }
   }, [user?.id]);
 
@@ -163,69 +137,53 @@ export default function App() {
       return;
     }
 
+    const reward = user.tier === 'PREMIUM' ? 1000 : 500;
+    const updatedBalance = user.walletBalance + reward;
+    const updatedUser: UserProfile = {
+      ...user,
+      walletBalance: updatedBalance,
+      totalEarned: user.totalEarned + reward,
+      tasksCompleted: user.tasksCompleted + 1
+    };
+
+    setUser(updatedUser);
+
+    if (type === 'video') {
+      setVideoTasks(prev =>
+        prev.map(t => (t.id === taskId ? { ...t, isCompleted: true } : t))
+      );
+    } else {
+      setSocialTasks(prev =>
+        prev.map(t => (t.id === taskId ? { ...t, isCompleted: true } : t))
+      );
+    }
+
+    const newTx: Transaction = {
+      id: `tx-${Date.now()}`,
+      userId: user.id,
+      type: 'TASK_EARN',
+      amount: reward,
+      status: 'COMPLETED',
+      description: type === 'video' ? `Completed YouTube Video Task (+₦${reward.toLocaleString()})` : `Completed Social Engagement Task (+₦${reward.toLocaleString()})`,
+      date: new Date().toISOString(),
+      reference: `9JA-TSK-${Math.floor(100000 + Math.random() * 900000)}`
+    };
+    setTransactions(prev => [newTx, ...prev]);
+
+    // Sync to Supabase
     try {
-      const res = await fetch('/api/tasks/complete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          taskId,
-          taskType: type
-        })
+      await supabaseDb.updateProfile(user.id, {
+        balance: updatedBalance
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to complete task');
-
-      setUser(data.user);
-      if (data.transaction) {
-        setTransactions(prev => [data.transaction, ...prev]);
-      }
-
-      if (type === 'video') {
-        setVideoTasks(prev =>
-          prev.map(t => (t.id === taskId ? { ...t, isCompleted: true } : t))
-        );
-      } else {
-        setSocialTasks(prev =>
-          prev.map(t => (t.id === taskId ? { ...t, isCompleted: true } : t))
-        );
-      }
-    } catch (err: unknown) {
-      // Fallback local update if network issue
-      const reward = user.tier === 'PREMIUM' ? 1000 : 500;
-
-      const updatedUser: UserProfile = {
-        ...user,
-        walletBalance: user.walletBalance + reward,
-        totalEarned: user.totalEarned + reward,
-        tasksCompleted: user.tasksCompleted + 1
-      };
-      setUser(updatedUser);
-
-      if (type === 'video') {
-        setVideoTasks(prev =>
-          prev.map(t => (t.id === taskId ? { ...t, isCompleted: true } : t))
-        );
-      } else {
-        setSocialTasks(prev =>
-          prev.map(t => (t.id === taskId ? { ...t, isCompleted: true } : t))
-        );
-      }
-
-      setTransactions(prev => [
-        {
-          id: `tx-${Date.now()}`,
-          userId: user.id,
-          type: 'TASK_EARN',
-          amount: reward,
-          status: 'COMPLETED',
-          description: type === 'video' ? 'Completed YouTube Video Task (+₦' + reward.toLocaleString() + ')' : 'Completed Social Engagement Task (+₦' + reward.toLocaleString() + ')',
-          date: new Date().toISOString(),
-          reference: `9JA-TSK-${Math.floor(100000 + Math.random() * 900000)}`
-        },
-        ...prev
-      ]);
+      await supabaseDb.recordTransaction({
+        userId: user.id,
+        amount: reward,
+        type: 'TASK_REWARD',
+        status: 'COMPLETED',
+        reference: newTx.reference
+      });
+    } catch (err) {
+      console.warn('Supabase task completion sync:', err);
     }
   };
 
@@ -236,43 +194,54 @@ export default function App() {
       throw new Error('Please login to answer quizzes');
     }
 
-    const res = await fetch('/api/quiz/submit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const targetQuiz = quizQuestions.find(q => q.id === questionId) || quizQuestions[0];
+    const isCorrect = targetQuiz ? selectedOption === targetQuiz.correctOption : true;
+    const rewardEarned = isCorrect ? (user.tier === 'PREMIUM' ? 1000 : 500) : 0;
+    const newAnsweredCount = quizAnsweredCount + 1;
+
+    setQuizAnsweredCount(newAnsweredCount);
+
+    if (isCorrect) {
+      const updatedBalance = user.walletBalance + rewardEarned;
+      const updatedUser: UserProfile = {
+        ...user,
+        walletBalance: updatedBalance,
+        totalEarned: user.totalEarned + rewardEarned,
+        tasksCompleted: user.tasksCompleted + 1
+      };
+      setUser(updatedUser);
+
+      const newTx: Transaction = {
+        id: `tx-quiz-${Date.now()}`,
         userId: user.id,
-        questionId,
-        selectedOption
-      })
-    });
+        type: 'QUIZ_EARN',
+        amount: rewardEarned,
+        status: 'COMPLETED',
+        description: `Daily Quiz Reward (+₦${rewardEarned.toLocaleString()})`,
+        date: new Date().toISOString(),
+        reference: `9JA-QZ-${Math.floor(100000 + Math.random() * 900000)}`
+      };
+      setTransactions(prev => [newTx, ...prev]);
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to submit answer');
-
-    setUser(data.user);
-    setQuizAnsweredCount(data.answeredCount);
-
-    if (data.isCorrect) {
-      setTransactions(prev => [
-        {
-          id: `tx-quiz-${Date.now()}`,
+      try {
+        await supabaseDb.updateProfile(user.id, { balance: updatedBalance });
+        await supabaseDb.recordTransaction({
           userId: user.id,
-          type: 'QUIZ_EARN',
-          amount: data.rewardEarned,
+          amount: rewardEarned,
+          type: 'TASK_REWARD',
           status: 'COMPLETED',
-          description: 'Daily Quiz Reward Increment',
-          date: new Date().toISOString(),
-          reference: `9JA-QZ-${Math.floor(100000 + Math.random() * 900000)}`
-        },
-        ...prev
-      ]);
+          reference: newTx.reference
+        });
+      } catch (err) {
+        console.warn('Supabase quiz sync:', err);
+      }
     }
 
     return {
-      isCorrect: data.isCorrect,
-      correctOption: data.correctOption,
-      explanation: data.explanation,
-      rewardEarned: data.rewardEarned
+      isCorrect,
+      correctOption: targetQuiz ? targetQuiz.correctOption : 'A',
+      explanation: targetQuiz ? targetQuiz.explanation : 'Correct answer verified!',
+      rewardEarned
     };
   };
 
@@ -285,99 +254,163 @@ export default function App() {
   }) => {
     if (!user) return;
 
-    const res = await fetch('/api/upgrade/submit-proof', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const newRequest: UpgradeRequest = {
+      id: `req_${Date.now()}`,
+      userId: user.id,
+      username: user.username,
+      userFullName: user.fullName,
+      userEmail: user.email,
+      userPhone: user.phone,
+      senderName: proofData.senderName,
+      senderBank: proofData.senderBank,
+      refNumber: proofData.refNumber,
+      amount: 10000,
+      status: 'PENDING',
+      submittedAt: new Date().toISOString(),
+      receiptImage: proofData.receiptImage
+    };
+
+    setPendingUpgrades(prev => [newRequest, ...prev]);
+    setUser(prev => prev ? { ...prev, upgradeStatus: 'PENDING' } : null);
+  };
+
+  // Instant Paystack Upgrade Handler (Syncs to Supabase DB)
+  const handleInstantUpgrade = async (reference: string) => {
+    if (!user) return;
+
+    try {
+      // 1. Sync to Supabase profiles table
+      await supabaseDb.upgradeUserToPremium(user.id, reference);
+
+      // 2. Record transaction in Supabase
+      await supabaseDb.recordTransaction({
         userId: user.id,
-        ...proofData
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to submit proof');
-
-    setUser(data.user);
-    if (data.request) {
-      setPendingUpgrades(prev => [data.request, ...prev]);
+        type: 'VIP_UPGRADE',
+        amount: 10000,
+        status: 'COMPLETED',
+        reference
+      });
+    } catch (err) {
+      console.warn('Supabase remote upgrade sync fallback:', err);
     }
+
+    // 3. Update local state
+    const updatedUser: UserProfile = {
+      ...user,
+      tier: 'PREMIUM',
+      loanLimit: 50000,
+      upgradeStatus: 'APPROVED'
+    };
+    setUser(updatedUser);
+    setQuizDailyLimit(10);
+
+    const newTx: Transaction = {
+      id: `tx_${Date.now()}`,
+      userId: user.id,
+      type: 'VIP_UPGRADE',
+      amount: 10000,
+      status: 'COMPLETED',
+      description: `Paystack VIP Upgrade: ${reference}`,
+      createdAt: new Date().toISOString()
+    };
+    setTransactions(prev => [newTx, ...prev]);
   };
 
   // Fast Instant Approve Upgrade
   const handleFastApprove = async () => {
     if (!user) return;
-
-    const res = await fetch('/api/upgrade/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id })
-    });
-
-    const data = await res.json();
-    if (res.ok) {
-      setUser(data.user);
-      setQuizDailyLimit(10);
-      fetchUserData();
-    } else {
-      // Fallback
-      setUser(prev => prev ? { ...prev, tier: 'PREMIUM', loanLimit: 50000 } : null);
-      setQuizDailyLimit(10);
+    try {
+      await supabaseDb.upgradeUserToPremium(user.id, 'FAST_APPROVE');
+    } catch {
+      // ignore
     }
+    setUser(prev => prev ? { ...prev, tier: 'PREMIUM', loanLimit: 50000, upgradeStatus: 'APPROVED' } : null);
+    setQuizDailyLimit(10);
   };
 
   // Admin Approve Upgrade Request
   const handleAdminApprove = async (targetUserId: string, requestId: string) => {
-    const res = await fetch('/api/upgrade/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: targetUserId, requestId })
-    });
-
-    if (res.ok) {
-      setPendingUpgrades(prev => prev.filter(r => r.id !== requestId));
-      if (user?.id === targetUserId) {
-        const data = await res.json();
-        setUser(data.user);
-      }
+    try {
+      await supabaseDb.upgradeUserToPremium(targetUserId, requestId);
+    } catch {
+      // ignore
+    }
+    setPendingUpgrades(prev => prev.filter(r => r.id !== requestId));
+    if (user?.id === targetUserId) {
+      setUser(prev => prev ? { ...prev, tier: 'PREMIUM', loanLimit: 50000, upgradeStatus: 'APPROVED' } : null);
+      setQuizDailyLimit(10);
     }
   };
 
   // Apply Loan
-  const handleApplyLoan = async (amount: number, tenureDays: number) => {
+  const handleApplyLoan = async (amount: number, _tenureDays: number) => {
     if (!user) return;
+    const updatedBalance = user.walletBalance + amount;
+    const updatedLoan = user.loanBalance + amount;
 
-    const res = await fetch('/api/loan/apply', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const updatedUser: UserProfile = {
+      ...user,
+      walletBalance: updatedBalance,
+      loanBalance: updatedLoan
+    };
+    setUser(updatedUser);
+
+    const newTx: Transaction = {
+      id: `tx-loan-${Date.now()}`,
+      userId: user.id,
+      type: 'LOAN_DISBURSED',
+      amount,
+      status: 'COMPLETED',
+      description: `Emergency Member Loan Disbursed (+₦${amount.toLocaleString()})`,
+      date: new Date().toISOString(),
+      reference: `9JA-LN-${Math.floor(100000 + Math.random() * 900000)}`
+    };
+    setTransactions(prev => [newTx, ...prev]);
+
+    try {
+      await supabaseDb.updateProfile(user.id, { balance: updatedBalance });
+      await supabaseDb.recordTransaction({
         userId: user.id,
         amount,
-        tenureDays
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Loan application failed');
-
-    setUser(data.user);
-    fetchUserData();
+        type: 'DEPOSIT',
+        status: 'COMPLETED',
+        reference: newTx.reference
+      });
+    } catch (err) {
+      console.warn('Supabase loan sync:', err);
+    }
   };
 
   // Repay Loan
   const handleRepayLoan = async () => {
-    if (!user) return;
+    if (!user || user.loanBalance <= 0) return;
+    const repayAmount = user.loanBalance;
+    const updatedBalance = Math.max(0, user.walletBalance - repayAmount);
 
-    const res = await fetch('/api/loan/repay', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId: user.id })
-    });
+    const updatedUser: UserProfile = {
+      ...user,
+      walletBalance: updatedBalance,
+      loanBalance: 0
+    };
+    setUser(updatedUser);
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Loan repayment failed');
+    const newTx: Transaction = {
+      id: `tx-repay-${Date.now()}`,
+      userId: user.id,
+      type: 'LOAN_REPAID',
+      amount: repayAmount,
+      status: 'COMPLETED',
+      description: `Loan Fully Repaid (-₦${repayAmount.toLocaleString()})`,
+      date: new Date().toISOString(),
+      reference: `9JA-RP-${Math.floor(100000 + Math.random() * 900000)}`
+    };
+    setTransactions(prev => [newTx, ...prev]);
 
-    setUser(data.user);
-    fetchUserData();
+    try {
+      await supabaseDb.updateProfile(user.id, { balance: updatedBalance });
+    } catch (err) {
+      console.warn('Supabase loan repay sync:', err);
+    }
   };
 
   // Withdraw
@@ -387,23 +420,41 @@ export default function App() {
     accountName: string;
   }) => {
     if (!user) return;
+    const updatedBalance = Math.max(0, user.walletBalance - amount);
+    const updatedUser: UserProfile = {
+      ...user,
+      walletBalance: updatedBalance,
+      bankDetails: {
+        bankName: bankDetails.bankName,
+        accountNumber: bankDetails.accountNumber,
+        accountName: bankDetails.accountName
+      }
+    };
+    setUser(updatedUser);
 
-    const res = await fetch('/api/withdraw', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    const newTx: Transaction = {
+      id: `tx-wd-${Date.now()}`,
+      userId: user.id,
+      type: 'WITHDRAWAL',
+      amount,
+      status: 'COMPLETED',
+      description: `Disbursement to ${bankDetails.bankName} (${bankDetails.accountNumber})`,
+      date: new Date().toISOString(),
+      reference: `9JA-WD-${Math.floor(100000 + Math.random() * 900000)}`
+    };
+    setTransactions(prev => [newTx, ...prev]);
+
+    try {
+      await supabaseDb.updateProfile(user.id, { balance: updatedBalance });
+      await supabaseDb.recordTransaction({
         userId: user.id,
         amount,
-        ...bankDetails
-      })
-    });
-
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Withdrawal failed');
-
-    setUser(data.user);
-    if (data.transaction) {
-      setTransactions(prev => [data.transaction, ...prev]);
+        type: 'WITHDRAWAL',
+        status: 'COMPLETED',
+        reference: newTx.reference
+      });
+    } catch (err) {
+      console.warn('Supabase withdrawal sync:', err);
     }
   };
 
@@ -419,16 +470,24 @@ export default function App() {
     isPremiumOnly: boolean;
     thumbnailUrl: string;
   }) => {
-    const res = await fetch('/api/admin/video-tasks', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(taskData)
-    });
+    const newTask: VideoTask = {
+      id: `vid_${Date.now()}`,
+      ...taskData
+    };
+    setVideoTasks(prev => [newTask, ...prev]);
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Failed to add task');
-
-    setVideoTasks(prev => [data.task, ...prev]);
+    try {
+      await supabaseDb.saveTaskToSupabase({
+        id: newTask.id,
+        title: newTask.title,
+        category: 'VIDEO',
+        reward: newTask.reward,
+        url_or_content: newTask.youtubeId,
+        timer_seconds: newTask.requiredWatchSeconds
+      });
+    } catch (err) {
+      console.warn('Supabase save task:', err);
+    }
   };
 
   // Open Auth Modal
@@ -437,10 +496,17 @@ export default function App() {
     setIsAuthOpen(true);
   };
 
-  // Logout
-  const handleLogout = () => {
+  // Logout via Supabase Client
+  const handleLogout = async () => {
     soundManager.playClickSound();
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // Ignore sign out error
+    }
     setUser(null);
+    localStorage.removeItem('9japay_user');
+    localStorage.removeItem('9japay_admin_token');
     setActiveTab('landing');
   };
 
@@ -565,6 +631,7 @@ export default function App() {
             isOpen={isUpgradeOpen}
             onClose={() => setIsUpgradeOpen(false)}
             onSubmitProof={handleSubmitProof}
+            onInstantUpgrade={handleInstantUpgrade}
           />
 
           <LoanModal

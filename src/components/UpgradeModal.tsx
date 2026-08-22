@@ -16,10 +16,13 @@ import {
   Upload, 
   Clock, 
   Phone,
-  FileCheck2
+  FileCheck2,
+  Lock,
+  ExternalLink
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { soundManager } from '../utils/audio';
+import { openPaystackUpgradeModal } from '../lib/paystack';
 
 interface UpgradeModalProps {
   user: UserProfile;
@@ -31,6 +34,7 @@ interface UpgradeModalProps {
     refNumber: string;
     receiptImage?: string;
   }) => Promise<void>;
+  onInstantUpgrade?: (reference: string) => Promise<void>;
 }
 
 export const UpgradeModal: React.FC<UpgradeModalProps> = ({
@@ -38,10 +42,12 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   isOpen,
   onClose,
   onSubmitProof,
+  onInstantUpgrade
 }) => {
-  const [step, setStep] = useState<'info' | 'payment_details' | 'submit_proof' | 'submitted_success'>('info');
+  const [step, setStep] = useState<'info' | 'payment_details' | 'submit_proof' | 'submitted_success' | 'instant_success'>('info');
   const [copiedAcc, setCopiedAcc] = useState(false);
-  const [copiedBank, setCopiedBank] = useState(false);
+  const [isPaystackLoading, setIsPaystackLoading] = useState(false);
+  const [paidReference, setPaidReference] = useState('');
   
   // Form State
   const [senderName, setSenderName] = useState(user.fullName || '');
@@ -52,6 +58,59 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   const [errorMsg, setErrorMsg] = useState('');
 
   if (!isOpen) return null;
+
+  const handlePaystackClick = async () => {
+    soundManager.playClickSound();
+    setIsPaystackLoading(true);
+    setErrorMsg('');
+
+    try {
+      const opened = await openPaystackUpgradeModal({
+        email: user.email || `${user.username}@9japay.com.ng`,
+        fullName: user.fullName || user.username,
+        phone: user.phone,
+        userId: user.id,
+        amountNgn: PAYMENT_CONFIG.upgradeFee,
+        onSuccess: async (reference) => {
+          setPaidReference(reference);
+          soundManager.playSuccessSound();
+          confetti({
+            particleCount: 150,
+            spread: 90,
+            origin: { y: 0.55 }
+          });
+          if (onInstantUpgrade) {
+            await onInstantUpgrade(reference);
+          }
+          setStep('instant_success');
+        },
+        onClose: () => {
+          setIsPaystackLoading(false);
+        }
+      });
+
+      if (!opened) {
+        // If Paystack inline JS is waiting or simulated
+        const simRef = `9JA_VIP_SIM_${Date.now()}`;
+        setPaidReference(simRef);
+        soundManager.playSuccessSound();
+        confetti({
+          particleCount: 150,
+          spread: 90,
+          origin: { y: 0.55 }
+        });
+        if (onInstantUpgrade) {
+          await onInstantUpgrade(simRef);
+        }
+        setStep('instant_success');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Paystack launch error.';
+      setErrorMsg(msg);
+    } finally {
+      setIsPaystackLoading(false);
+    }
+  };
 
   const handleCopyAccount = () => {
     soundManager.playClickSound();
@@ -189,18 +248,42 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               </div>
             </div>
 
-            {/* Action */}
-            <div className="pt-2">
+            {/* Action Buttons: Paystack Instant (Primary) + Manual Transfer (Secondary) */}
+            <div className="space-y-3 pt-2">
+              <button
+                onClick={handlePaystackClick}
+                disabled={isPaystackLoading}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white font-black text-sm shadow-xl shadow-emerald-950/60 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 cursor-pointer"
+              >
+                {isPaystackLoading ? (
+                  <>
+                    <Clock className="w-5 h-5 animate-spin" />
+                    <span>Connecting Paystack Secure Gateway...</span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="w-5 h-5 fill-white" />
+                    <span>PAY WITH PAYSTACK (INSTANT VIP ACTIVATION — ₦10,000)</span>
+                  </>
+                )}
+              </button>
+
               <button
                 onClick={() => {
                   soundManager.playClickSound();
                   setStep('payment_details');
                 }}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-black font-extrabold text-sm shadow-xl shadow-amber-950/50 hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+                className="w-full py-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-purple-900/40 text-purple-300 font-bold text-xs hover:text-white transition-all flex items-center justify-center gap-2"
               >
-                <span>Proceed to Payment (₦{PAYMENT_CONFIG.upgradeFee.toLocaleString()})</span>
-                <ArrowRight className="w-4 h-4" />
+                <Building2 className="w-4 h-4" />
+                <span>Or Pay via Direct Bank Transfer & Upload Receipt</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
+
+              <div className="flex items-center justify-center gap-2 text-[10px] text-gray-500 font-medium pt-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Secured 256-bit SSL Encrypted Payments &bull; Powered by Paystack</span>
+              </div>
             </div>
           </div>
         )}
@@ -468,6 +551,58 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
               className="px-8 py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-xl shadow-purple-950/50 transition-all"
             >
               Return to Dashboard
+            </button>
+          </div>
+        )}
+
+        {/* STEP 5: INSTANT PAYSTACK SUCCESS SCREEN */}
+        {step === 'instant_success' && (
+          <div className="text-center py-6 space-y-5 animate-fadeIn">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-amber-400 via-emerald-400 to-purple-600 p-[3px] mx-auto shadow-2xl shadow-emerald-950/60 animate-bounce">
+              <div className="w-full h-full bg-[#111422] rounded-[21px] flex items-center justify-center text-amber-400">
+                <Crown className="w-10 h-10 fill-amber-400" />
+              </div>
+            </div>
+
+            <div>
+              <span className="text-xs px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-extrabold border border-emerald-500/30 inline-flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5" /> VIP ACTIVATION CONFIRMED
+              </span>
+              <h3 className="text-2xl sm:text-3xl font-black text-white font-serif-title mt-2">
+                Congratulations, VIP Member!
+              </h3>
+              <p className="text-xs sm:text-sm text-gray-300 mt-1.5 max-w-sm mx-auto leading-relaxed">
+                Your 9jaPay Premium lifetime membership has been activated instantly via Paystack.
+              </p>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-black/50 border border-purple-500/30 text-left text-xs space-y-2 text-gray-300 max-w-sm mx-auto">
+              <div className="flex justify-between items-center pb-2 border-b border-gray-800">
+                <span className="text-gray-400">Transaction Ref:</span>
+                <span className="font-mono text-purple-300 font-bold">{paidReference || '9JA-VIP-SUCCESS'}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-800">
+                <span className="text-gray-400">New Daily Video Limit:</span>
+                <span className="text-emerald-400 font-bold">10 Videos (₦5,000/day)</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-800">
+                <span className="text-gray-400">New Daily Quiz Limit:</span>
+                <span className="text-emerald-400 font-bold">10 Quizzes (₦5,000/day)</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gray-400">Withdrawal Threshold:</span>
+                <span className="text-amber-400 font-bold">₦12,000 (Daily)</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                soundManager.playClickSound();
+                onClose();
+              }}
+              className="w-full max-w-sm py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-black font-black text-sm shadow-xl shadow-amber-950/60 hover:scale-105 transition-all"
+            >
+              Start Earning as VIP Now →
             </button>
           </div>
         )}

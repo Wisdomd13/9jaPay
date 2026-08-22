@@ -37,6 +37,11 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
 
   const categories = ['All', 'Finance', 'Tech', 'Crypto', 'Tutorial'];
 
+  const isPremium = user.tier === 'PREMIUM';
+  const dailyLimit = isPremium ? 10 : 1;
+  const completedCount = videoTasks.filter(t => t.isCompleted).length;
+  const isCapped = completedCount >= dailyLimit;
+
   const filteredTasks = videoTasks.filter(task => {
     if (selectedCategory === 'All') return true;
     return task.category === selectedCategory;
@@ -62,6 +67,15 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
 
   const handleOpenVideo = (task: VideoTask) => {
     soundManager.playClickSound();
+    if (task.isCompleted) {
+      return;
+    }
+    if (isCapped) {
+      if (!isPremium) {
+        onOpenUpgrade();
+      }
+      return;
+    }
     if (task.isPremiumOnly && user.tier !== 'PREMIUM') {
       onOpenUpgrade();
       return;
@@ -97,13 +111,20 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
       {/* Header Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-black text-white font-display flex items-center gap-2">
               <Youtube className="w-6 h-6 text-red-500" />
               Watch & Earn Videos
             </h2>
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 font-bold border border-red-500/30 flex items-center gap-1">
               <Flame className="w-3 h-3 fill-red-400" /> {user.tier === 'PREMIUM' ? '₦1,000 / Video (VIP)' : '₦500 / Video (Free)'}
+            </span>
+            <span className={`text-xs px-2.5 py-0.5 rounded-full font-extrabold border ${
+              isCapped 
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' 
+                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+            }`}>
+              {completedCount}/{dailyLimit} Watched Today {isCapped ? '(Daily Cap Reached)' : ''}
             </span>
           </div>
           <p className="text-xs sm:text-sm text-gray-400 mt-1">

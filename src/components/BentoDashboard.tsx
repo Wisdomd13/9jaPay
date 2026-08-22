@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { UserProfile, VideoTask, QuizQuestion, SocialTask } from '../types';
 import { WalletWidget } from './WalletWidget';
 import { AudioGuidePlayer } from './AudioGuidePlayer';
+import { LIVE_PAYOUTS } from '../data/initialData';
 import { 
   Zap, 
   Youtube, 
@@ -114,9 +115,62 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  // Auto-scrolling live payouts ticker ref
+  const tickerRef = useRef<HTMLDivElement>(null);
+  const [isTickerPaused, setIsTickerPaused] = useState(false);
+
+  useEffect(() => {
+    const el = tickerRef.current;
+    if (!el) return;
+    let animationFrameId: number;
+    const step = () => {
+      if (!isTickerPaused && el) {
+        el.scrollLeft += 0.8;
+        if (el.scrollLeft >= (el.scrollWidth - el.clientWidth) / 2) {
+          el.scrollLeft = 0;
+        }
+      }
+      animationFrameId = requestAnimationFrame(step);
+    };
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isTickerPaused]);
+
   return (
     <div className="space-y-6">
       
+      {/* Live Verified Member Payouts (All ≥ ₦12,000) */}
+      <div className="relative rounded-2xl bg-[#100D18]/90 border border-purple-900/30 p-2 sm:p-2.5 shadow-xl backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 font-bold text-purple-300 uppercase tracking-wider text-[10px] sm:text-xs bg-purple-950/60 px-3 py-1 rounded-xl border border-purple-500/30 flex-shrink-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span>Live Withdrawals</span>
+          </div>
+
+          <div
+            ref={tickerRef}
+            onMouseEnter={() => setIsTickerPaused(true)}
+            onMouseLeave={() => setIsTickerPaused(false)}
+            onTouchStart={() => setIsTickerPaused(true)}
+            onTouchEnd={() => setIsTickerPaused(false)}
+            className="flex items-center gap-3 overflow-x-hidden py-0.5 px-2 select-none"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            {[...LIVE_PAYOUTS, ...LIVE_PAYOUTS].map((p, i) => (
+              <div
+                key={i}
+                className="inline-flex items-center gap-2 text-xs bg-black/50 border border-white/5 px-2.5 py-1 rounded-xl flex-shrink-0"
+              >
+                <span className="text-white font-bold">{p.name}</span>
+                <span className="text-[#F5C744] font-black font-mono">{p.amount}</span>
+                <span className="text-gray-400 text-[11px]">via {p.bank}</span>
+                <span className="text-gray-500 text-[10px]">({p.time})</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Top Bento Row: Hero Wallet (col-span-8) + Audio Guide (col-span-4) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         

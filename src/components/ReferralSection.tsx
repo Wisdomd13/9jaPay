@@ -42,17 +42,33 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
   const referralLink = `${origin}/register.php?ref=${user.username}`;
 
   // Fetch Referral Leaderboard
-  const fetchLeaderboard = async () => {
+  const fetchLeaderboard = () => {
+    setIsLoadingLeaderboard(true);
     try {
-      setIsLoadingLeaderboard(true);
-      const res = await fetch(`/api/leaderboard/referrals?userId=${user.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setLeaderboard(data.leaderboard || []);
-        setCurrentUserRank(data.currentUser || null);
-      }
-    } catch (err) {
-      console.error('Failed to load referral leaderboard', err);
+      const mockTop: ReferralLeaderboardEntry[] = [
+        { rank: 1, username: 'chinedu_vip', totalReferrals: 142, tier: 'PREMIUM', prize: '₦50,000 Cash + 20GB Data' },
+        { rank: 2, username: 'ibrahim_k', totalReferrals: 119, tier: 'PREMIUM', prize: '₦30,000 Cash' },
+        { rank: 3, username: 'ngozi_wealth', totalReferrals: 98, tier: 'PREMIUM', prize: '₦20,000 Cash' },
+        { rank: 4, username: 'tunde_ace', totalReferrals: 76, tier: 'PREMIUM' },
+        { rank: 5, username: 'fatima_gold', totalReferrals: 64, tier: 'PREMIUM' },
+        { rank: 6, username: 'blessing_9ja', totalReferrals: 51, tier: 'PREMIUM' },
+        { rank: 7, username: 'david_crypto', totalReferrals: 43, tier: 'PREMIUM' },
+        { rank: 8, username: 'kelechi_boss', totalReferrals: 38, tier: 'PREMIUM' },
+        { rank: 9, username: 'zainab_earn', totalReferrals: 29, tier: 'FREE' },
+        { rank: 10, username: 'emeka_pro', totalReferrals: 24, tier: 'PREMIUM' }
+      ];
+
+      const userReferrals = user.referralsCount || 0;
+      const userRank: ReferralLeaderboardEntry = {
+        rank: userReferrals > 142 ? 1 : userReferrals > 119 ? 2 : userReferrals > 98 ? 3 : 14,
+        username: user.username,
+        totalReferrals: userReferrals,
+        tier: user.tier,
+        prize: userReferrals > 142 ? '₦50,000 Cash' : undefined
+      };
+
+      setLeaderboard(mockTop);
+      setCurrentUserRank(userRank);
     } finally {
       setIsLoadingLeaderboard(false);
     }

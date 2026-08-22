@@ -38,56 +38,70 @@ export interface UserProfile {
 
 export interface ReferralLeaderboardEntry {
   rank: number;
-  userId: string;
+  userId?: string;
   username: string;
-  fullName: string;
+  fullName?: string;
   tier: MembershipTier;
   totalReferrals: number;
-  vipReferrals: number;
-  totalReferralEarned: number;
+  vipReferrals?: number;
+  totalReferralEarned?: number;
+  prize?: string;
   isCurrentUser?: boolean;
 }
 
 export interface LoginLog {
   id: string;
   userId: string;
-  username: string;
-  fullName: string;
+  username?: string;
+  fullName?: string;
   email: string;
-  tier: MembershipTier;
-  loginTime: string;
+  tier?: MembershipTier;
+  loginTime?: string;
+  timestamp?: string;
   ipAddress?: string;
   device?: string;
-  type: 'SIGNUP' | 'LOGIN' | 'UPGRADE_REQUEST' | 'UPGRADE_APPROVED';
+  type?: 'SIGNUP' | 'LOGIN' | 'UPGRADE_REQUEST' | 'UPGRADE_APPROVED';
   details?: string;
 }
 
 export interface WithdrawalRequest {
   id: string;
   userId: string;
-  username: string;
+  username?: string;
+  userFullName?: string;
+  userEmail?: string;
+  userTier?: MembershipTier;
   amount: number;
   bankName: string;
   accountNumber: string;
   accountName: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
-  date: string;
-  reference: string;
+  date?: string;
+  requestedAt?: string;
+  reference?: string;
 }
 
 export interface AdminOverviewData {
   totalUsers: number;
-  premiumUsers: number;
-  freeUsers: number;
+  activeUsers?: number;
+  premiumUsers?: number;
+  freeUsers?: number;
+  paidPremiumMembers?: number;
   totalRevenue: number;
-  totalPaidOut: number;
-  totalTasksCompleted: number;
-  totalWalletBalances: number;
+  totalPaidOut?: number;
+  totalPayoutsDisbursed?: number;
+  totalTasksCompleted?: number;
+  totalWalletBalances?: number;
+  pendingUpgradesCount?: number;
+  pendingWithdrawalsCount?: number;
   pendingUpgrades: UpgradeRequest[];
-  approvedUpgrades: UpgradeRequest[];
+  approvedUpgrades?: UpgradeRequest[];
   withdrawals?: WithdrawalRequest[];
-  allUsers: UserProfile[];
-  loginLogs: LoginLog[];
+  pendingWithdrawals?: WithdrawalRequest[];
+  users?: UserProfile[];
+  allUsers?: UserProfile[];
+  loginLogs?: LoginLog[];
+  recentLoginLogs?: LoginLog[];
 }
 
 export interface VideoTask {
@@ -102,6 +116,7 @@ export interface VideoTask {
   isPremiumOnly: boolean;
   thumbnailUrl: string;
   viewsCount?: string;
+  isCompleted?: boolean;
 }
 
 export interface SocialTask {
@@ -136,11 +151,12 @@ export interface QuizQuestion {
 export interface Transaction {
   id: string;
   userId: string;
-  type: 'TASK_EARN' | 'QUIZ_EARN' | 'REFERRAL_BONUS' | 'UPGRADE_PAYMENT' | 'WITHDRAWAL' | 'LOAN_DISBURSED' | 'LOAN_REPAID' | 'WELCOME_BONUS';
+  type: 'TASK_EARN' | 'QUIZ_EARN' | 'REFERRAL_BONUS' | 'UPGRADE_PAYMENT' | 'VIP_UPGRADE' | 'DEPOSIT' | 'WITHDRAWAL' | 'LOAN_DISBURSED' | 'LOAN_REPAID' | 'WELCOME_BONUS';
   amount: number;
   status: 'COMPLETED' | 'PENDING' | 'FAILED';
   description: string;
-  date: string;
+  date?: string;
+  createdAt?: string;
   reference?: string;
 }
 
@@ -160,6 +176,9 @@ export interface UpgradeRequest {
   id: string;
   userId: string;
   username: string;
+  userFullName?: string;
+  userEmail?: string;
+  userPhone?: string;
   amount: number;
   senderName: string;
   senderBank: string;

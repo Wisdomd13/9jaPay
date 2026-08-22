@@ -326,3 +326,21 @@ export const NIGERIAN_BANKS = [
   'Wema Bank / ALAT',
   'Ecobank Nigeria'
 ];
+
+export const LIVE_PAYOUTS = [
+  { name: 'Emeka O.', amount: '₦18,500', method: 'Direct Bank Transfer', time: '1m ago', bank: 'OPay' },
+  { name: 'Amina B.', amount: '₦12,000', method: 'VIP Daily Payout', time: '2m ago', bank: 'Kuda MFB' },
+  { name: 'Blessing K.', amount: '₦25,000', method: 'Bank Transfer', time: '4m ago', bank: 'GTBank' },
+  { name: 'Tunde A.', amount: '₦14,500', method: 'Instant Withdrawal', time: '5m ago', bank: 'PalmPay' },
+  { name: 'Chukwuma E.', amount: '₦35,000', method: 'Direct Payout', time: '7m ago', bank: 'Access Bank' },
+  { name: 'Fatima S.', amount: '₦16,200', method: 'Daily Cashout', time: '9m ago', bank: 'Zenith Bank' },
+  { name: 'Oluwaseun D.', amount: '₦22,000', method: 'Bank Transfer', time: '11m ago', bank: 'FairMoney MFB' },
+  { name: 'Ngozi M.', amount: '₦65,000', method: 'Milestone Withdrawal', time: '13m ago', bank: 'Moniepoint MFB' },
+  { name: 'Ibrahim Y.', amount: '₦14,000', method: 'Instant NUBAN Transfer', time: '16m ago', bank: 'UBA' },
+  { name: 'Chioma R.', amount: '₦48,500', method: 'VIP Fast Payout', time: '18m ago', bank: 'FirstBank' },
+  { name: 'David N.', amount: '₦12,500', method: 'Direct Bank Payout', time: '20m ago', bank: 'Stanbic IBTC' },
+  { name: 'Kelechi U.', amount: '₦75,000', method: 'Verified Bank Settlement', time: '22m ago', bank: 'OPay' },
+  { name: 'Zainab M.', amount: '₦15,000', method: 'Instant Cashout', time: '24m ago', bank: 'FairMoney MFB' },
+  { name: 'Babajide A.', amount: '₦30,000', method: 'Direct Transfer', time: '26m ago', bank: 'Access Bank' },
+];
+

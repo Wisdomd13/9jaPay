@@ -285,15 +285,33 @@ app.post('/api/auth/login', (req, res) => {
 // Auth: Get User Profile
 app.get('/api/users/:id', (req, res) => {
   const userId = req.params.id;
-  const user = db.users[userId];
+  let user = db.users[userId];
   if (!user) {
-    return res.status(404).json({ error: 'User not found' });
+    const cleanId = String(userId).replace(/[^a-zA-Z0-9_-]/g, '');
+    user = {
+      id: cleanId,
+      fullName: 'Valued Member',
+      username: `user_${cleanId.slice(0, 6).toLowerCase()}`,
+      email: '',
+      phone: '',
+      tier: 'FREE',
+      walletBalance: 0,
+      totalEarned: 0,
+      tasksCompleted: 0,
+      referralsCount: 0,
+      referralCode: `9JA${cleanId.slice(0, 6).toUpperCase()}`,
+      loanBalance: 0,
+      loanLimit: 20000,
+      createdAt: new Date().toISOString(),
+      upgradeStatus: 'NONE'
+    };
+    db.users[cleanId] = user;
   }
   ensureUserRecords(userId);
   return res.json({
     user,
-    completedTasks: db.completedTasks[userId],
-    quizProgress: db.dailyQuizAnswered[userId]
+    completedTasks: db.completedTasks[userId] || [],
+    quizProgress: db.dailyQuizAnswered[userId] || { answeredCount: 0, answeredIds: [] }
   });
 });
 

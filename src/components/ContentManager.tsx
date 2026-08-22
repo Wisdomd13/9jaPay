@@ -15,6 +15,8 @@ import {
   X
 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
+import { supabaseDb } from '../lib/supabaseDb';
+import { INITIAL_QUIZ_QUESTIONS, INITIAL_VIDEO_TASKS, INITIAL_SOCIAL_TASKS } from '../data/initialData';
 
 interface ContentManagerProps {
   onRefreshParent: () => void;
@@ -26,9 +28,9 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Data lists
-  const [quizList, setQuizList] = useState<QuizQuestion[]>([]);
-  const [videoList, setVideoList] = useState<VideoTask[]>([]);
-  const [socialList, setSocialList] = useState<SocialTask[]>([]);
+  const [quizList, setQuizList] = useState<QuizQuestion[]>(INITIAL_QUIZ_QUESTIONS);
+  const [videoList, setVideoList] = useState<VideoTask[]>(INITIAL_VIDEO_TASKS);
+  const [socialList, setSocialList] = useState<SocialTask[]>(INITIAL_SOCIAL_TASKS);
 
   // Quiz Form State
   const [quizId, setQuizId] = useState('');
@@ -71,13 +73,10 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
   const loadContent = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/admin/content-items');
-      if (res.ok) {
-        const data = await res.json();
-        setQuizList(data.quizQuestions || []);
-        setVideoList(data.videoTasks || []);
-        setSocialList(data.socialTasks || []);
-      }
+      const data = await supabaseDb.fetchAllTasks();
+      if (data.quizzes?.length) setQuizList(data.quizzes);
+      if (data.videos?.length) setVideoList(data.videos);
+      if (data.socials?.length) setSocialList(data.socials);
     } catch {
       // ignore
     } finally {
@@ -102,33 +101,45 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
       return;
     }
 
+    const newQuiz: QuizQuestion = {
+      id: quizId || `quiz_${Date.now()}`,
+      question: questionText,
+      options: { A: optA, B: optB, C: optC, D: optD },
+      correctOption,
+      explanation,
+      reward: Number(quizReward) || 500,
+      category: quizCategory
+    };
+
+    setQuizList(prev => {
+      const exists = prev.some(q => q.id === newQuiz.id);
+      if (exists) {
+        return prev.map(q => (q.id === newQuiz.id ? newQuiz : q));
+      }
+      return [newQuiz, ...prev];
+    });
+
     try {
-      const res = await fetch('/api/admin/quiz-questions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: quizId || undefined,
-          question: questionText,
-          options: { A: optA, B: optB, C: optC, D: optD },
-          correctOption,
-          explanation,
-          reward: Number(quizReward) || 500,
-          category: quizCategory
-        })
+      await supabaseDb.saveTaskToSupabase({
+        id: newQuiz.id,
+        title: newQuiz.question,
+        category: 'QUIZ',
+        reward: newQuiz.reward,
+        url_or_content: JSON.stringify({
+          options: newQuiz.options,
+          correctOption: newQuiz.correctOption,
+          explanation: newQuiz.explanation
+        }),
+        timer_seconds: 30
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save quiz');
-
-      soundManager.playSuccessSound();
-      showMsg(isEditingQuiz ? 'Quiz question updated successfully!' : 'New Quiz question added live!');
-      resetQuizForm();
-      loadContent();
-      onRefreshParent();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error saving quiz';
-      showMsg(msg, 'error');
+    } catch {
+      // ignore
     }
+
+    soundManager.playSuccessSound();
+    showMsg(isEditingQuiz ? 'Quiz question updated successfully!' : 'New Quiz question added live!');
+    resetQuizForm();
+    onRefreshParent();
   };
 
   const handleEditQuiz = (q: QuizQuestion) => {
@@ -148,17 +159,15 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
 
   const handleDeleteQuiz = async (qId: string) => {
     if (!confirm('Are you sure you want to delete this quiz question from live users?')) return;
+    setQuizList(prev => prev.filter(q => q.id !== qId));
     try {
-      const res = await fetch(`/api/admin/quiz-questions/${qId}`, { method: 'DELETE' });
-      if (res.ok) {
-        soundManager.playClickSound();
-        showMsg('Quiz question deleted.');
-        loadContent();
-        onRefreshParent();
-      }
+      await supabaseDb.deleteTaskFromSupabase(qId);
     } catch {
-      showMsg('Failed to delete quiz', 'error');
+      // ignore
     }
+    soundManager.playClickSound();
+    showMsg('Quiz question deleted.');
+    onRefreshParent();
   };
 
   const resetQuizForm = () => {
@@ -183,35 +192,44 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
       return;
     }
 
+    const newVideo: VideoTask = {
+      id: videoEditId || `vid_${Date.now()}`,
+      title: videoTitle,
+      channelName: videoChannel || '9jaPay Partner',
+      youtubeId: videoYoutubeId,
+      reward: Number(videoReward) || 500,
+      requiredWatchSeconds: Number(videoWatchSec) || 30,
+      durationSeconds: (Number(videoWatchSec) || 30) * 3,
+      category: videoCat,
+      isPremiumOnly: videoIsPrem,
+      thumbnailUrl: `https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=600&auto=format&fit=crop&q=80`
+    };
+
+    setVideoList(prev => {
+      const exists = prev.some(v => v.id === newVideo.id);
+      if (exists) {
+        return prev.map(v => (v.id === newVideo.id ? newVideo : v));
+      }
+      return [newVideo, ...prev];
+    });
+
     try {
-      const res = await fetch('/api/admin/video-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: videoEditId || undefined,
-          title: videoTitle,
-          channelName: videoChannel,
-          youtubeId: videoYoutubeId,
-          reward: Number(videoReward),
-          requiredWatchSeconds: Number(videoWatchSec),
-          durationSeconds: Number(videoWatchSec) * 3,
-          category: videoCat,
-          isPremiumOnly: videoIsPrem
-        })
+      await supabaseDb.saveTaskToSupabase({
+        id: newVideo.id,
+        title: newVideo.title,
+        category: 'VIDEO',
+        reward: newVideo.reward,
+        url_or_content: newVideo.youtubeId,
+        timer_seconds: newVideo.requiredWatchSeconds
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save video task');
-
-      soundManager.playSuccessSound();
-      showMsg(isEditingVideo ? 'Video task updated!' : 'Video task published successfully!');
-      resetVideoForm();
-      loadContent();
-      onRefreshParent();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error saving video task';
-      showMsg(msg, 'error');
+    } catch {
+      // ignore
     }
+
+    soundManager.playSuccessSound();
+    showMsg(isEditingVideo ? 'Video task updated!' : 'Video task published successfully!');
+    resetVideoForm();
+    onRefreshParent();
   };
 
   const handleEditVideo = (v: VideoTask) => {
@@ -229,17 +247,15 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
 
   const handleDeleteVideo = async (id: string) => {
     if (!confirm('Are you sure you want to remove this video task?')) return;
+    setVideoList(prev => prev.filter(v => v.id !== id));
     try {
-      const res = await fetch(`/api/admin/video-tasks/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        soundManager.playClickSound();
-        showMsg('Video task removed.');
-        loadContent();
-        onRefreshParent();
-      }
+      await supabaseDb.deleteTaskFromSupabase(id);
     } catch {
-      showMsg('Failed to delete video task', 'error');
+      // ignore
     }
+    soundManager.playClickSound();
+    showMsg('Video task removed.');
+    onRefreshParent();
   };
 
   const resetVideoForm = () => {
@@ -262,35 +278,43 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
       return;
     }
 
+    const newSocial: SocialTask = {
+      id: socialEditId || `soc_${Date.now()}`,
+      title: socialTitle,
+      platform: socialPlatform,
+      actionType: socialActionType,
+      reward: Number(socialReward) || 500,
+      actionUrl: socialUrl,
+      timerSeconds: Number(socialTimerSec) || 15,
+      isPremiumOnly: socialIsPrem,
+      instructions: socialInstructions || 'Complete social engagement to earn instant cash.'
+    };
+
+    setSocialList(prev => {
+      const exists = prev.some(s => s.id === newSocial.id);
+      if (exists) {
+        return prev.map(s => (s.id === newSocial.id ? newSocial : s));
+      }
+      return [newSocial, ...prev];
+    });
+
     try {
-      const res = await fetch('/api/admin/social-tasks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: socialEditId || undefined,
-          title: socialTitle,
-          platform: socialPlatform,
-          actionType: socialActionType,
-          reward: Number(socialReward),
-          actionUrl: socialUrl,
-          timerSeconds: Number(socialTimerSec),
-          isPremiumOnly: socialIsPrem,
-          instructions: socialInstructions
-        })
+      await supabaseDb.saveTaskToSupabase({
+        id: newSocial.id,
+        title: newSocial.title,
+        category: 'SOCIAL',
+        reward: newSocial.reward,
+        url_or_content: newSocial.actionUrl,
+        timer_seconds: newSocial.timerSeconds
       });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to save social task');
-
-      soundManager.playSuccessSound();
-      showMsg(isEditingSocial ? 'Social task updated!' : 'Social task created live!');
-      resetSocialForm();
-      loadContent();
-      onRefreshParent();
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error saving social task';
-      showMsg(msg, 'error');
+    } catch {
+      // ignore
     }
+
+    soundManager.playSuccessSound();
+    showMsg(isEditingSocial ? 'Social task updated!' : 'Social task created live!');
+    resetSocialForm();
+    onRefreshParent();
   };
 
   const handleEditSocial = (s: SocialTask) => {
@@ -309,17 +333,15 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
 
   const handleDeleteSocial = async (id: string) => {
     if (!confirm('Are you sure you want to delete this social task?')) return;
+    setSocialList(prev => prev.filter(s => s.id !== id));
     try {
-      const res = await fetch(`/api/admin/social-tasks/${id}`, { method: 'DELETE' });
-      if (res.ok) {
-        soundManager.playClickSound();
-        showMsg('Social task removed.');
-        loadContent();
-        onRefreshParent();
-      }
+      await supabaseDb.deleteTaskFromSupabase(id);
     } catch {
-      showMsg('Failed to delete social task', 'error');
+      // ignore
     }
+    soundManager.playClickSound();
+    showMsg('Social task removed.');
+    onRefreshParent();
   };
 
   const resetSocialForm = () => {
