@@ -29,9 +29,9 @@ export const NineJaPayLogo: React.FC<NineJaPayLogoProps> = ({
   };
 
   return (
-    <div className={`inline-flex items-center gap-3 select-none ${className}`}>
+    <div className={`inline-flex items-center gap-2.5 select-none ${className}`}>
       {/* 9jaPay Iconic 3D Green '9' Folded Emblem */}
-      <div className={`relative ${iconSizes[size]} flex-shrink-0 flex items-center justify-center filter drop-shadow-[0_4px_12px_rgba(34,197,94,0.35)]`}>
+      <div className={`relative ${iconSizes[size]} flex-shrink-0 flex items-center justify-center filter drop-shadow-[0_4px_14px_rgba(124,255,0,0.3)]`}>
         <svg
           viewBox="0 0 200 200"
           fill="none"
@@ -39,31 +39,31 @@ export const NineJaPayLogo: React.FC<NineJaPayLogoProps> = ({
           className="w-full h-full transform hover:scale-105 transition-transform duration-200"
         >
           <defs>
-            {/* Main vibrant lime to green gradient */}
-            <linearGradient id="nineja_lime_green" x1="20" y1="20" x2="180" y2="180" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#a3e635" />
-              <stop offset="45%" stopColor="#22c55e" />
-              <stop offset="100%" stopColor="#059669" />
+            {/* Main brand gradient: #7CFF00 -> #39E600 -> #00B83D */}
+            <linearGradient id="nineja_brand_primary" x1="20" y1="20" x2="180" y2="180" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#7CFF00" />
+              <stop offset="50%" stopColor="#39E600" />
+              <stop offset="100%" stopColor="#00B83D" />
             </linearGradient>
 
             {/* Inner folded arrow ribbon gradient (3D depth) */}
             <linearGradient id="nineja_arrow_shade" x1="120" y1="50" x2="175" y2="140" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#22c55e" />
-              <stop offset="60%" stopColor="#15803d" />
-              <stop offset="100%" stopColor="#064e3b" />
+              <stop offset="0%" stopColor="#39E600" />
+              <stop offset="60%" stopColor="#063B16" />
+              <stop offset="100%" stopColor="#020805" />
             </linearGradient>
 
             {/* 3D Under-ribbon crease shadow */}
             <linearGradient id="nineja_crease" x1="100" y1="90" x2="140" y2="160" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#047857" />
-              <stop offset="100%" stopColor="#022c22" />
+              <stop offset="0%" stopColor="#063B16" />
+              <stop offset="100%" stopColor="#020805" />
             </linearGradient>
 
-            {/* Top 9 ring highlight */}
+            {/* Top 9 ring neon highlight */}
             <linearGradient id="nineja_ring_hi" x1="40" y1="30" x2="120" y2="120" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#d9f99d" />
-              <stop offset="30%" stopColor="#84cc16" />
-              <stop offset="100%" stopColor="#16a34a" />
+              <stop offset="0%" stopColor="#E8F0EA" />
+              <stop offset="30%" stopColor="#7CFF00" />
+              <stop offset="100%" stopColor="#39E600" />
             </linearGradient>
           </defs>
 
@@ -91,23 +91,23 @@ export const NineJaPayLogo: React.FC<NineJaPayLogoProps> = ({
           {/* Forward Action Ribbon (Smooth Front Cap) */}
           <path
             d="M 102 18 C 108 18 135 18 152 28 C 166 36 178 52 178 70 C 178 84 170 98 158 112 L 98 178 C 92 184 84 186 76 186 L 36 186 C 28 186 24 178 28 172 L 56 136 C 42 122 34 104 34 84 C 34 48 64 18 102 18 Z M 92 56 C 76.5 56 64 68.5 64 84 C 64 99.5 76.5 112 92 112 C 107.5 112 120 99.5 120 84 C 120 68.5 107.5 56 92 56 Z"
-            fill="url(#nineja_lime_green)"
+            fill="url(#nineja_brand_primary)"
           />
 
           {/* Gloss & Glow Highlights */}
           <path
             d="M 94 22 C 126 22 152 46 156 76 C 148 50 124 32 94 32 C 68 32 46 48 38 72 C 44 43 66 22 94 22 Z"
-            fill="#ffffff"
-            opacity="0.35"
+            fill="#FFFFFF"
+            opacity="0.4"
           />
         </svg>
       </div>
 
-      {/* Modern Wordmark: "9ja" in Crisp White + "pay" in Bright Emerald/Neon Green */}
+      {/* Modern Wordmark: "9ja" in Crisp White + "pay" in Bright Neon Green */}
       {showText && (
         <span className={`${textSizes[size]} font-black tracking-tight flex items-baseline font-display`}>
-          <span className="text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.5)]">9ja</span>
-          <span className="text-[#00E676] bg-gradient-to-r from-[#84cc16] via-[#22c55e] to-[#00E676] bg-clip-text text-transparent ml-0.5 drop-shadow-[0_0_12px_rgba(34,197,94,0.4)]">
+          <span className="text-[#FFFFFF] drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">9ja</span>
+          <span className="text-[#39E600] bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] bg-clip-text text-transparent ml-0.5 drop-shadow-[0_0_14px_rgba(124,255,0,0.4)]">
             pay
           </span>
         </span>
@@ -115,4 +115,5 @@ export const NineJaPayLogo: React.FC<NineJaPayLogoProps> = ({
     </div>
   );
 };
+
 

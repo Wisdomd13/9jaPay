@@ -121,29 +121,29 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-black text-white font-display flex items-center gap-2">
-              <Gift className="w-6 h-6 text-purple-400" />
+              <Gift className="w-6 h-6 text-[#7CFF00]" />
               Referral Program & Leaderboard
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#063B16] text-[#7CFF00] font-bold border border-[#7CFF00]/30">
               ₦6,000 per VIP Upgrade
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#A8B5AB] mt-1">
             Invite friends to 9jaPay. Earn ₦6,000 VIP commission whenever your referred friends upgrade to the Premium plan!
           </p>
         </div>
 
         {/* View Switcher */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-gray-900/90 border border-gray-800 self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#071A0C] border border-[#7CFF00]/15 self-start sm:self-auto">
           <button
             onClick={() => {
               soundManager.playClickSound();
               setActiveView('invite');
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               activeView === 'invite'
-                ? 'bg-purple-600 text-white shadow-lg shadow-purple-950/50'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-[#063B16] text-[#7CFF00] border border-[#7CFF00] shadow-lg shadow-[#7CFF00]/10'
+                : 'text-[#A8B5AB] hover:text-white'
             }`}
           >
             <Share2 className="w-3.5 h-3.5" />
@@ -155,10 +155,10 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
               setActiveView('leaderboard');
               fetchLeaderboard();
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               activeView === 'leaderboard'
-                ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-black shadow-lg shadow-amber-950/50'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-gradient-to-r from-[#FFB800] to-yellow-400 text-black font-black shadow-lg shadow-amber-950/50'
+                : 'text-[#A8B5AB] hover:text-white'
             }`}
           >
             <Trophy className="w-3.5 h-3.5" />
@@ -171,8 +171,8 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
       {isFreeTier && (
         <div className={`p-4 sm:p-5 rounded-3xl border transition-all ${
           hasLockedCommissions
-            ? 'bg-gradient-to-r from-red-950/40 via-purple-950/40 to-[#121524] border-red-500/40 shadow-xl'
-            : 'bg-[#121524]/90 border-amber-500/30'
+            ? 'bg-gradient-to-r from-red-950/40 via-[#071A0C] to-[#071A0C] border-red-500/40 shadow-xl'
+            : 'bg-[#071A0C] border-amber-500/30'
         }`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3.5">
@@ -192,7 +192,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                     FREE TIER
                   </span>
                 </div>
-                <p className="text-xs text-gray-300 leading-relaxed max-w-2xl">
+                <p className="text-xs text-[#A8B5AB] leading-relaxed max-w-2xl">
                   {hasLockedCommissions ? (
                     <>
                       One or more of your referred users upgraded to VIP Premium. Because your account is currently on the <strong>FREE tier</strong>, you do not have access to the <strong>₦6,000 commission</strong> per upgrade until you activate your own Premium Package!
@@ -211,7 +211,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                 soundManager.playClickSound();
                 onOpenUpgrade();
               }}
-              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-black text-xs shadow-lg shadow-amber-950/50 hover:scale-105 transition-all flex items-center justify-center gap-2 shrink-0"
+              className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#FFB800] to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-black text-xs shadow-lg shadow-amber-950/50 hover:scale-105 transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer"
             >
               <Crown className="w-4 h-4" />
               <span>{hasLockedCommissions ? `Unlock ₦${(user.lockedReferralCommission || 0).toLocaleString()}` : 'Upgrade to VIP for ₦6k Reward'}</span>
@@ -222,39 +222,39 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
       {/* VIEW 1: MY INVITE HUB */}
       {activeView === 'invite' && (
-        <div className="glass-card rounded-3xl p-6 sm:p-8 border border-purple-800/30 shadow-2xl relative overflow-hidden space-y-6">
+        <div className="rounded-3xl p-6 sm:p-8 bg-[#071A0C] border border-[#7CFF00]/20 shadow-2xl relative overflow-hidden space-y-6">
           
           {/* Background Glow */}
-          <div className="absolute top-0 right-0 w-72 h-72 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-72 h-72 bg-[#7CFF00]/5 rounded-full blur-3xl pointer-events-none" />
 
           {/* Link Generator Box */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold uppercase tracking-wider text-purple-300">
+              <label className="block text-xs font-bold uppercase tracking-wider text-[#7CFF00]">
                 Your Unique Referral Invite Link
               </label>
-              <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
+              <span className="text-xs text-[#22C55E] font-bold flex items-center gap-1">
                 <Sparkles className="w-3.5 h-3.5" /> Direct Tracking Active
               </span>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
-              <div className="flex-1 px-4 py-3.5 rounded-2xl bg-black/60 border border-gray-700 text-sm font-mono text-gray-200 truncate flex items-center">
+              <div className="flex-1 px-4 py-3.5 rounded-2xl bg-black/60 border border-[#7CFF00]/20 text-sm font-mono text-gray-200 truncate flex items-center">
                 {referralLink}
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyLink}
-                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm shadow-lg shadow-purple-950/50 hover:scale-105 transition-all"
+                  className="flex-1 sm:flex-initial flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] text-black font-black text-sm shadow-lg shadow-[#7CFF00]/20 hover:scale-105 transition-all cursor-pointer hover:opacity-95"
                 >
-                  {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
+                  {copied ? <Check className="w-4 h-4 text-black" /> : <Copy className="w-4 h-4" />}
                   <span>{copied ? 'Copied Link!' : 'Copy Link'}</span>
                 </button>
 
                 <button
                   onClick={handleShare}
-                  className="p-3.5 rounded-2xl bg-gray-800 hover:bg-gray-700 text-white shadow-md transition-colors"
+                  className="p-3.5 rounded-2xl bg-white/5 hover:bg-white/10 text-white shadow-md transition-colors cursor-pointer border border-[#7CFF00]/15"
                   title="Share Referral Link"
                 >
                   <Share2 className="w-4 h-4" />
@@ -267,14 +267,14 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
             {/* Promo Code */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/40 to-[#121524] border border-purple-800/30 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-[#040F07] border border-[#7CFF00]/20 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center font-bold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-[#063B16] text-[#7CFF00] flex items-center justify-center font-bold text-sm border border-[#7CFF00]/30">
                   #
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">Your Referral Code</p>
-                  <p className="text-base font-black font-mono text-white tracking-wider">
+                  <p className="text-xs text-[#A8B5AB]">Your Referral Code</p>
+                  <p className="text-base font-black font-mono text-[#7CFF00] tracking-wider">
                     {user.referralCode}
                   </p>
                 </div>
@@ -282,21 +282,21 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
               <button
                 onClick={handleCopyCode}
-                className="px-3.5 py-1.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-xs font-bold text-gray-200 flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-bold text-white flex items-center gap-1.5 cursor-pointer border border-white/10"
               >
-                {copiedCode ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedCode ? <Check className="w-3.5 h-3.5 text-[#7CFF00]" /> : <Copy className="w-3.5 h-3.5" />}
                 <span>{copiedCode ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
 
             {/* National Rank Position */}
-            <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-950/30 via-[#121524] to-[#121524] border border-amber-500/30 flex items-center justify-between">
+            <div className="p-4 rounded-2xl bg-[#040F07] border border-amber-500/30 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-300 flex items-center justify-center font-bold text-sm border border-amber-500/30">
                   <Trophy className="w-5 h-5 text-amber-400" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-400">Leaderboard Rank</p>
+                  <p className="text-xs text-[#A8B5AB]">Leaderboard Rank</p>
                   <p className="text-base font-black font-mono text-amber-300">
                     {currentUserRank ? `#${currentUserRank.rank} in Nigeria` : 'Unranked (0 Invites)'}
                   </p>
@@ -308,7 +308,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                   soundManager.playClickSound();
                   setActiveView('leaderboard');
                 }}
-                className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold flex items-center gap-1 border border-amber-500/30"
+                className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-xs font-bold flex items-center gap-1 border border-amber-500/30 cursor-pointer"
               >
                 <span>View Board</span>
                 <ArrowUpRight className="w-3 h-3" />
@@ -319,7 +319,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
           {/* Tier-Based Reward Breakdown Matrix */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-gray-400">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#A8B5AB]">
               Referral Reward Earnings Rules
             </h3>
 
@@ -327,18 +327,18 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
               
               {/* Free Tier Reward Card */}
               <div className={`p-5 rounded-2xl border space-y-2.5 ${
-                isFreeTier ? 'bg-purple-950/30 border-purple-500/50' : 'bg-gray-900/60 border-gray-800'
+                isFreeTier ? 'bg-[#063B16]/30 border-[#7CFF00]/40' : 'bg-[#040F07] border-white/10'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-purple-300 uppercase">Non-Premium Referrers</span>
-                    {isFreeTier && <span className="text-[10px] px-2 py-0.2 rounded bg-purple-500/30 text-purple-200 font-bold">YOUR CURRENT TIER</span>}
+                    <span className="text-xs font-bold text-white uppercase">Non-Premium Referrers</span>
+                    {isFreeTier && <span className="text-[10px] px-2 py-0.2 rounded bg-white/10 text-[#7CFF00] font-bold border border-[#7CFF00]/30">YOUR CURRENT TIER</span>}
                   </div>
-                  <span className="text-base font-black text-white font-mono">₦6,000 Locked</span>
+                  <span className="text-base font-black text-amber-400 font-mono">₦6,000 Locked</span>
                 </div>
-                <ul className="text-xs text-gray-300 space-y-1.5">
-                  <li className="flex items-center gap-2 text-purple-300">
-                    <Check className="w-3.5 h-3.5 shrink-0 text-emerald-400" />
+                <ul className="text-xs text-[#A8B5AB] space-y-1.5">
+                  <li className="flex items-center gap-2 text-white">
+                    <Check className="w-3.5 h-3.5 shrink-0 text-[#7CFF00]" />
                     <span>Free signups tracked to your account</span>
                   </li>
                   <li className="flex items-center gap-2 text-amber-300">
@@ -350,7 +350,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
               {/* Premium Tier Reward Card */}
               <div className={`p-5 rounded-2xl border space-y-2.5 ${
-                !isFreeTier ? 'bg-amber-950/30 border-amber-500/50' : 'bg-gradient-to-br from-amber-500/10 to-purple-500/10 border-amber-500/30'
+                !isFreeTier ? 'bg-amber-950/30 border-amber-500/50' : 'bg-gradient-to-br from-amber-500/10 to-[#063B16]/30 border-amber-500/30'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -361,12 +361,12 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                   </div>
                   <span className="text-base font-black text-amber-400 font-mono">₦6,000 / Upgrade</span>
                 </div>
-                <ul className="text-xs text-gray-300 space-y-1.5">
-                  <li className="flex items-center gap-2 text-emerald-400">
+                <ul className="text-xs text-[#A8B5AB] space-y-1.5">
+                  <li className="flex items-center gap-2 text-[#7CFF00]">
                     <Check className="w-3.5 h-3.5 shrink-0" />
                     <span>Free signups tracked to your affiliate link</span>
                   </li>
-                  <li className="flex items-center gap-2 text-emerald-400">
+                  <li className="flex items-center gap-2 text-[#7CFF00]">
                     <Unlock className="w-3.5 h-3.5 shrink-0" />
                     <span><strong>+₦6,000 Instant Cash</strong> credited on every referee VIP upgrade!</span>
                   </li>
@@ -377,20 +377,20 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           </div>
 
           {/* Quick Metrics */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-gray-800/80">
-            <div className="p-3.5 rounded-2xl bg-[#0D101C] border border-gray-800 text-center">
-              <span className="text-[10px] uppercase font-bold text-gray-400">Total Referrals</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t border-[#7CFF00]/10">
+            <div className="p-3.5 rounded-2xl bg-[#040F07] border border-[#7CFF00]/15 text-center">
+              <span className="text-[10px] uppercase font-bold text-[#A8B5AB]">Total Referrals</span>
               <p className="text-xl font-black text-white font-mono mt-0.5">{user.referralsCount}</p>
             </div>
-            <div className="p-3.5 rounded-2xl bg-[#0D101C] border border-gray-800 text-center">
+            <div className="p-3.5 rounded-2xl bg-[#040F07] border border-[#7CFF00]/15 text-center">
               <span className="text-[10px] uppercase font-bold text-amber-300">VIP Upgrades</span>
               <p className="text-xl font-black text-amber-300 font-mono mt-0.5">{user.vipReferralsCount || 0}</p>
             </div>
-            <div className="p-3.5 rounded-2xl bg-[#0D101C] border border-gray-800 text-center">
-              <span className="text-[10px] uppercase font-bold text-emerald-400">Earned Payouts</span>
-              <p className="text-xl font-black text-emerald-400 font-mono mt-0.5">₦{(user.totalEarned || 0).toLocaleString()}</p>
+            <div className="p-3.5 rounded-2xl bg-[#040F07] border border-[#7CFF00]/15 text-center">
+              <span className="text-[10px] uppercase font-bold text-[#7CFF00]">Earned Payouts</span>
+              <p className="text-xl font-black text-[#7CFF00] font-mono mt-0.5">₦{(user.totalEarned || 0).toLocaleString()}</p>
             </div>
-            <div className="p-3.5 rounded-2xl bg-[#0D101C] border border-gray-800 text-center">
+            <div className="p-3.5 rounded-2xl bg-[#040F07] border border-[#7CFF00]/15 text-center">
               <span className="text-[10px] uppercase font-bold text-red-400">Locked Bonus</span>
               <p className="text-xl font-black text-red-400 font-mono mt-0.5">₦{(user.lockedReferralCommission || 0).toLocaleString()}</p>
             </div>
@@ -401,22 +401,22 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
 
       {/* VIEW 2: REFERRAL LEADERBOARD */}
       {activeView === 'leaderboard' && (
-        <div className="glass-card rounded-3xl p-6 sm:p-8 border border-amber-500/30 shadow-2xl relative overflow-hidden space-y-6">
+        <div className="rounded-3xl p-6 sm:p-8 bg-[#071A0C] border border-amber-500/30 shadow-2xl relative overflow-hidden space-y-6">
           
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-800 pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#7CFF00]/10 pb-4">
             <div>
               <h3 className="text-lg sm:text-xl font-black text-white font-display flex items-center gap-2">
                 <Trophy className="w-5 h-5 text-amber-400" />
                 9jaPay Top Referrers Leaderboard
               </h3>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-[#A8B5AB] mt-0.5">
                 Live national rankings of the highest earning affiliate members in Nigeria.
               </p>
             </div>
 
             <button
               onClick={fetchLeaderboard}
-              className="text-xs text-amber-300 hover:text-amber-200 font-bold flex items-center gap-1 self-start sm:self-auto"
+              className="text-xs text-amber-300 hover:text-amber-200 font-bold flex items-center gap-1 self-start sm:self-auto cursor-pointer"
             >
               <span>Refresh Rankings</span>
             </button>
@@ -486,7 +486,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                     <tr 
                       key={entry.userId}
                       className={`hover:bg-white/[0.02] transition-colors ${
-                        entry.isCurrentUser ? 'bg-purple-950/40 border-l-4 border-purple-500' : ''
+                        entry.isCurrentUser ? 'bg-[#063B16]/50 border-l-4 border-[#7CFF00]' : ''
                       }`}
                     >
                       <td className="py-3 px-3 font-bold text-white">
@@ -494,7 +494,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                       </td>
                       <td className="py-3 px-3">
                         <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-lg bg-gray-800 text-gray-300 font-bold flex items-center justify-center text-xs">
+                          <div className="w-7 h-7 rounded-lg bg-[#063B16] text-[#7CFF00] font-bold flex items-center justify-center text-xs border border-[#7CFF00]/20">
                             {entry.fullName[0]}
                           </div>
                           <div>
@@ -502,7 +502,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                             <span className="text-[10px] text-gray-400 block font-mono">@{entry.username}</span>
                           </div>
                           {entry.isCurrentUser && (
-                            <span className="ml-1 text-[9px] px-1.5 py-0.2 rounded bg-purple-500 text-white font-bold font-sans">
+                            <span className="ml-1 text-[9px] px-1.5 py-0.2 rounded bg-[#7CFF00] text-black font-black font-sans">
                               YOU
                             </span>
                           )}
@@ -514,7 +514,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                             PREMIUM VIP
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 font-bold text-[10px]">
+                          <span className="px-2 py-0.5 rounded-full bg-white/5 text-gray-400 font-bold text-[10px] border border-white/10">
                             FREE
                           </span>
                         )}
@@ -525,7 +525,7 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
                       <td className="py-3 px-3 text-center text-amber-300 font-bold">
                         {entry.vipReferrals}
                       </td>
-                      <td className="py-3 px-3 text-right font-black text-emerald-400">
+                      <td className="py-3 px-3 text-right font-black text-[#7CFF00]">
                         ₦{entry.totalReferralEarned.toLocaleString()}
                       </td>
                     </tr>
@@ -536,16 +536,16 @@ export const ReferralSection: React.FC<ReferralSectionProps> = ({
           </div>
 
           {/* Footer Call to Action */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 to-[#121524] border border-purple-800/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-[#040F07] border border-[#7CFF00]/20 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <Flame className="w-5 h-5 text-amber-400" />
-              <p className="text-xs text-gray-300">
+              <Flame className="w-5 h-5 text-[#7CFF00]" />
+              <p className="text-xs text-[#A8B5AB]">
                 Want to climb to the top? Share your referral link on WhatsApp status, TikTok, and Twitter!
               </p>
             </div>
             <button
               onClick={handleCopyLink}
-              className="w-full sm:w-auto px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 shadow-md"
+              className="w-full sm:w-auto px-5 py-2 rounded-xl bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] hover:opacity-95 text-black text-xs font-black flex items-center justify-center gap-1.5 shrink-0 shadow-md shadow-[#7CFF00]/20 cursor-pointer"
             >
               <Copy className="w-3.5 h-3.5" />
               <span>{copied ? 'Copied Link!' : 'Copy Referral Link'}</span>

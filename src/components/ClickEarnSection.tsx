@@ -93,11 +93,11 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case 'Telegram':
-        return <Send className="w-5 h-5 text-blue-400" />;
+        return <Send className="w-5 h-5 text-[#7CFF00]" />;
       case 'Twitter / X':
         return <Twitter className="w-5 h-5 text-sky-400" />;
       default:
-        return <Globe className="w-5 h-5 text-purple-400" />;
+        return <Globe className="w-5 h-5 text-[#7CFF00]" />;
     }
   };
 
@@ -109,14 +109,14 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-black text-white font-display flex items-center gap-2">
-              <MousePointerClick className="w-6 h-6 text-purple-400" />
+              <MousePointerClick className="w-6 h-6 text-[#7CFF00]" />
               Click & Earn / Social Tasks
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-bold border border-purple-500/30">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#063B16] text-[#7CFF00] font-bold border border-[#7CFF00]/30">
               {user.tier === 'PREMIUM' ? '₦1,000 / Task (VIP)' : '₦500 / Task (Free)'}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#A8B5AB] mt-1">
             Complete quick sponsored visits and social engagements to earn ₦{user.tier === 'PREMIUM' ? '1,000' : '500'} directly into your wallet.
           </p>
         </div>
@@ -130,26 +130,26 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
             <div
               key={task.id}
               onClick={() => !task.isCompleted && handleStartTask(task)}
-              className={`glass-card p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 ${
+              className={`p-5 rounded-2xl bg-[#071A0C] border transition-all flex flex-col justify-between gap-4 ${
                 task.isCompleted
-                  ? 'border-emerald-500/30 opacity-75'
+                  ? 'border-[#22C55E]/30 opacity-75'
                   : isLocked
                   ? 'border-amber-500/30 hover:border-amber-500/60 cursor-pointer'
-                  : 'border-gray-800 hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-950/20 cursor-pointer hover:-translate-y-0.5'
+                  : 'border-[#7CFF00]/15 hover:border-[#7CFF00] hover:shadow-xl hover:shadow-[#7CFF00]/10 cursor-pointer hover:-translate-y-0.5'
               }`}
             >
               <div className="flex items-start gap-3.5">
-                <div className="w-12 h-12 rounded-xl bg-gray-900/90 border border-gray-800 flex items-center justify-center flex-shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-[#040F07] border border-[#7CFF00]/15 flex items-center justify-center flex-shrink-0">
                   {getPlatformIcon(task.platform)}
                 </div>
 
                 <div className="space-y-1 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-purple-400">
+                    <span className="text-xs font-semibold text-[#7CFF00]">
                       {task.platform}
                     </span>
                     {task.isPremiumOnly && (
-                      <span className="text-[10px] font-bold px-2 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                      <span className="text-[10px] font-black px-2 py-0.2 rounded bg-[#FFB800] text-black shadow-sm">
                         VIP ONLY
                       </span>
                     )}
@@ -159,25 +159,25 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
                     {task.title}
                   </h3>
 
-                  <p className="text-xs text-gray-400 line-clamp-2">
+                  <p className="text-xs text-[#A8B5AB] line-clamp-2">
                     {task.instructions}
                   </p>
                 </div>
               </div>
 
-              <div className="pt-3 border-t border-gray-800/80 flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-xs text-gray-400">
+              <div className="pt-3 border-t border-[#7CFF00]/10 flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs text-[#A8B5AB]">
                   <Clock className="w-3.5 h-3.5 text-gray-500" />
                   <span>{task.timerSeconds}s verification</span>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <span className="text-sm font-extrabold text-emerald-400">
+                  <span className="text-sm font-black text-[#7CFF00]">
                     +₦{user.tier === 'PREMIUM' ? '1,000' : '500'}
                   </span>
 
                   {task.isCompleted ? (
-                    <span className="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-bold flex items-center gap-1">
+                    <span className="px-3 py-1 rounded-lg bg-[#063B16] text-[#22C55E] text-xs font-bold flex items-center gap-1 border border-[#22C55E]/30">
                       <CheckCircle className="w-3.5 h-3.5" /> Done
                     </span>
                   ) : isLocked ? (
@@ -186,12 +186,12 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
                         e.stopPropagation();
                         onOpenUpgrade();
                       }}
-                      className="px-3 py-1 rounded-lg bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-xs font-bold flex items-center gap-1"
+                      className="px-3 py-1 rounded-lg bg-[#FFB800] text-black text-xs font-black flex items-center gap-1 cursor-pointer hover:opacity-95"
                     >
                       <Lock className="w-3 h-3" /> Unlock
                     </button>
                   ) : (
-                    <button className="px-3.5 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold shadow-sm">
+                    <button className="px-3.5 py-1 rounded-lg bg-gradient-to-r from-[#7CFF00] to-[#39E600] text-black text-xs font-black shadow-sm cursor-pointer hover:opacity-95">
                       Start Task
                     </button>
                   )}
@@ -204,14 +204,14 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
 
       {/* Task Execution Modal */}
       {activeTask && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-lg rounded-3xl bg-[#121524] border border-purple-800/40 p-6 sm:p-7 shadow-2xl space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-lg rounded-3xl bg-[#071A0C] border border-[#7CFF00]/30 p-6 sm:p-7 shadow-2xl space-y-5">
             
-            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+            <div className="flex items-center justify-between border-b border-[#7CFF00]/10 pb-4">
               <div className="flex items-center gap-2">
                 {getPlatformIcon(activeTask.platform)}
                 <div>
-                  <span className="text-xs text-purple-400 font-semibold">{activeTask.platform}</span>
+                  <span className="text-xs text-[#7CFF00] font-semibold">{activeTask.platform}</span>
                   <h3 className="text-base font-bold text-white">{activeTask.title}</h3>
                 </div>
               </div>
@@ -220,14 +220,14 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
                   soundManager.playClickSound();
                   setActiveTask(null);
                 }}
-                className="p-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-black/40 border border-gray-800 space-y-2">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-gray-400">Step 1: Instructions</h4>
+            <div className="p-4 rounded-2xl bg-[#040F07] border border-[#7CFF00]/15 space-y-2">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-[#A8B5AB]">Step 1: Instructions</h4>
               <p className="text-sm text-gray-200">{activeTask.instructions}</p>
             </div>
 
@@ -235,30 +235,30 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
             <div className="space-y-3">
               <button
                 onClick={handleOpenLink}
-                className="w-full py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-950/50 hover:scale-[1.01] transition-all"
+                className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] text-black font-black text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#7CFF00]/20 hover:scale-[1.01] transition-all cursor-pointer hover:opacity-95"
               >
                 <ExternalLink className="w-4 h-4" />
                 <span>{hasVisited ? 'Re-open Task Link' : 'Open Link to Perform Task'}</span>
               </button>
 
               {hasVisited && (
-                <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-800/40 text-center space-y-2">
-                  <div className="text-xs text-purple-300 font-medium">
+                <div className="p-4 rounded-2xl bg-[#063B16]/50 border border-[#7CFF00]/30 text-center space-y-2">
+                  <div className="text-xs text-[#7CFF00] font-medium">
                     {countdown > 0 ? (
                       <span className="flex items-center justify-center gap-2">
-                        <Clock className="w-4 h-4 animate-spin text-amber-400" />
+                        <Clock className="w-4 h-4 animate-spin text-[#FFB800]" />
                         Verifying action... Please wait {countdown}s
                       </span>
                     ) : (
-                      <span className="text-emerald-400 font-bold flex items-center justify-center gap-2">
+                      <span className="text-[#22C55E] font-bold flex items-center justify-center gap-2">
                         <CheckCircle className="w-4 h-4" /> Verification complete! Ready to claim.
                       </span>
                     )}
                   </div>
 
-                  <div className="w-full bg-gray-800 h-2 rounded-full overflow-hidden">
+                  <div className="w-full bg-black/60 h-2 rounded-full overflow-hidden border border-[#7CFF00]/10">
                     <div
-                      className="bg-gradient-to-r from-purple-500 to-emerald-400 h-full rounded-full transition-all duration-300"
+                      className="bg-gradient-to-r from-[#7CFF00] to-[#22C55E] h-full rounded-full transition-all duration-300"
                       style={{
                         width: `${Math.max(0, ((activeTask.timerSeconds - countdown) / activeTask.timerSeconds) * 100)}%`
                       }}
@@ -269,10 +269,10 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
             </div>
 
             {/* Step 3: Claim */}
-            <div className="pt-2 flex items-center justify-between border-t border-gray-800">
-              <div className="text-xs text-gray-400">
+            <div className="pt-2 flex items-center justify-between border-t border-[#7CFF00]/10">
+              <div className="text-xs text-[#A8B5AB]">
                 Reward:{' '}
-                <span className="text-emerald-400 font-bold text-sm">
+                <span className="text-[#7CFF00] font-bold text-sm">
                   +₦{user.tier === 'PREMIUM' ? '1,000' : '500'}
                 </span>
               </div>
@@ -280,10 +280,10 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
               <button
                 onClick={handleClaim}
                 disabled={!hasVisited || countdown > 0 || isClaiming}
-                className={`px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-md transition-all ${
+                className={`px-6 py-2.5 rounded-xl font-black text-sm flex items-center gap-2 shadow-md transition-all cursor-pointer ${
                   hasVisited && countdown === 0 && !isClaiming
-                    ? 'bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white animate-pulse shadow-emerald-950/50'
-                    : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                    ? 'bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] text-black animate-pulse shadow-[#7CFF00]/20 hover:opacity-95'
+                    : 'bg-white/10 text-gray-500 cursor-not-allowed'
                 }`}
               >
                 <Award className="w-4 h-4" />

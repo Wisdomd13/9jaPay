@@ -31,37 +31,37 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
     switch (tx.type) {
       case 'WITHDRAWAL':
         return {
-          icon: <ArrowUpRight className="w-5 h-5 text-emerald-400" />,
-          bgColor: 'bg-emerald-500/10 border-emerald-500/20',
-          textColor: 'text-emerald-400',
+          icon: <ArrowUpRight className="w-5 h-5 text-[#22C55E]" />,
+          bgColor: 'bg-[#063B16] border-[#22C55E]/30',
+          textColor: 'text-[#22C55E]',
           sign: '-'
         };
       case 'UPGRADE_PAYMENT':
         return {
-          icon: <Sparkles className="w-5 h-5 text-amber-400" />,
-          bgColor: 'bg-amber-500/10 border-amber-500/20',
-          textColor: 'text-amber-400',
+          icon: <Sparkles className="w-5 h-5 text-[#FFB800]" />,
+          bgColor: 'bg-[#FFB800]/10 border-[#FFB800]/20',
+          textColor: 'text-[#FFB800]',
           sign: '-'
         };
       case 'LOAN_DISBURSED':
         return {
-          icon: <ArrowDownLeft className="w-5 h-5 text-blue-400" />,
-          bgColor: 'bg-blue-500/10 border-blue-500/20',
-          textColor: 'text-blue-400',
+          icon: <ArrowDownLeft className="w-5 h-5 text-[#7CFF00]" />,
+          bgColor: 'bg-[#063B16] border-[#7CFF00]/30',
+          textColor: 'text-[#7CFF00]',
           sign: '+'
         };
       case 'LOAN_REPAID':
         return {
-          icon: <ArrowUpRight className="w-5 h-5 text-indigo-400" />,
-          bgColor: 'bg-indigo-500/10 border-indigo-500/20',
-          textColor: 'text-indigo-400',
+          icon: <ArrowUpRight className="w-5 h-5 text-sky-400" />,
+          bgColor: 'bg-sky-500/10 border-sky-500/20',
+          textColor: 'text-sky-400',
           sign: '-'
         };
       default:
         return {
-          icon: <ArrowDownLeft className="w-5 h-5 text-emerald-400" />,
-          bgColor: 'bg-emerald-500/10 border-emerald-500/20',
-          textColor: 'text-emerald-400',
+          icon: <ArrowDownLeft className="w-5 h-5 text-[#7CFF00]" />,
+          bgColor: 'bg-[#063B16] border-[#7CFF00]/30',
+          textColor: 'text-[#7CFF00]',
           sign: '+'
         };
     }
@@ -85,14 +85,14 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
         <div>
           <div className="flex items-center gap-2">
             <h2 className="text-xl sm:text-2xl font-black text-white font-display flex items-center gap-2">
-              <History className="w-6 h-6 text-purple-400" />
+              <History className="w-6 h-6 text-[#7CFF00]" />
               Transaction Ledger
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-gray-800 text-gray-300 font-mono">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#063B16] text-[#7CFF00] font-mono border border-[#7CFF00]/30">
               {transactions.length} Records
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#A8B5AB] mt-1">
             Complete real-time audit log of your task earnings, quiz rewards, referrals, loans, and bank payouts.
           </p>
         </div>
@@ -106,10 +106,10 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
                 soundManager.playClickSound();
                 setFilter(f);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 filter === f
-                  ? 'bg-purple-600 text-white shadow-md'
-                  : 'bg-gray-900 text-gray-400 hover:text-white border border-gray-800'
+                  ? 'bg-[#063B16] text-[#7CFF00] border border-[#7CFF00] shadow-md shadow-[#7CFF00]/20'
+                  : 'bg-[#071A0C] text-[#A8B5AB] hover:text-white border border-[#7CFF00]/15 hover:border-[#7CFF00]/30'
               }`}
             >
               {f}
@@ -119,11 +119,11 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
       </div>
 
       {/* Transaction List Card */}
-      <div className="glass-card rounded-3xl p-4 sm:p-6 border border-purple-800/30 shadow-2xl space-y-3">
+      <div className="rounded-3xl p-4 sm:p-6 bg-[#071A0C] border border-[#7CFF00]/20 shadow-2xl space-y-3">
         {filtered.length === 0 ? (
-          <div className="text-center py-12 text-gray-400 space-y-2">
+          <div className="text-center py-12 text-[#A8B5AB] space-y-2">
             <History className="w-10 h-10 mx-auto text-gray-600" />
-            <p className="text-sm font-semibold text-gray-300">No transactions found under this filter.</p>
+            <p className="text-sm font-semibold text-white">No transactions found under this filter.</p>
           </div>
         ) : (
           filtered.map((tx) => {
@@ -131,7 +131,7 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
             return (
               <div
                 key={tx.id}
-                className="p-4 rounded-2xl bg-[#0D101C] border border-gray-800/80 hover:border-purple-500/40 transition-colors flex items-center justify-between gap-4"
+                className="p-4 rounded-2xl bg-[#040F07] border border-[#7CFF00]/15 hover:border-[#7CFF00]/50 transition-colors flex items-center justify-between gap-4"
               >
                 <div className="flex items-center gap-3.5">
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border ${meta.bgColor}`}>
@@ -141,12 +141,12 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
                     <h4 className="text-sm font-bold text-white leading-snug">
                       {tx.description}
                     </h4>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-gray-400">
+                    <div className="flex items-center gap-2 mt-1 text-[11px] text-[#A8B5AB]">
                       <span className="font-mono">{formatDate(tx.date)}</span>
                       {tx.reference && (
                         <>
                           <span>•</span>
-                          <span className="font-mono text-purple-400 font-semibold">{tx.reference}</span>
+                          <span className="font-mono text-[#7CFF00] font-semibold">{tx.reference}</span>
                         </>
                       )}
                     </div>
@@ -157,7 +157,7 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
                   <span className={`text-base font-black font-display ${meta.textColor}`}>
                     {meta.sign}₦{tx.amount.toLocaleString()}
                   </span>
-                  <div className="flex items-center justify-end gap-1 text-[10px] text-emerald-400 font-semibold mt-0.5">
+                  <div className="flex items-center justify-end gap-1 text-[10px] text-[#22C55E] font-semibold mt-0.5">
                     <CheckCircle className="w-3 h-3" />
                     <span>SUCCESS</span>
                   </div>

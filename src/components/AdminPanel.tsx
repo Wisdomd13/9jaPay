@@ -467,27 +467,27 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/90 backdrop-blur-xl overflow-y-auto font-sans">
-      <div className="relative w-full max-w-6xl my-4 rounded-3xl bg-[#0B0F19] border border-cyan-900/40 shadow-2xl overflow-hidden text-white flex flex-col max-h-[92vh]">
+      <div className="relative w-full max-w-6xl my-4 rounded-3xl bg-[#071A0C] border border-[#7CFF00]/30 shadow-2xl overflow-hidden text-white flex flex-col max-h-[92vh]">
         
         {/* Top Glowing Gradient Bar */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-cyan-500 via-indigo-500 to-amber-400" />
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#FFB800]" />
 
         {/* Header Bar */}
-        <div className="p-4 sm:p-6 border-b border-gray-800/80 bg-[#0E1322] flex items-center justify-between gap-4">
+        <div className="p-4 sm:p-6 border-b border-[#7CFF00]/15 bg-[#040F07] flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center border border-cyan-500/40 shadow-lg shadow-cyan-950/50">
+            <div className="w-11 h-11 rounded-2xl bg-[#063B16] text-[#7CFF00] flex items-center justify-center border border-[#7CFF00]/40 shadow-lg shadow-[#7CFF00]/10">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-lg sm:text-xl font-black font-display tracking-tight text-white">
-                  9jaPay <span className="text-cyan-400">Master Control</span> Portal
+                  9jaPay <span className="text-[#7CFF00]">Master Control</span> Portal
                 </h2>
-                <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-[10px] font-mono font-bold border border-cyan-500/30">
+                <span className="px-2 py-0.5 rounded-full bg-[#063B16] text-[#7CFF00] text-[10px] font-mono font-bold border border-[#7CFF00]/30">
                   ADMIN CORE
                 </span>
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-[#A8B5AB]">
                 Centralized user tracking, VIP payment audits, real-time sign-in logs & task management
               </p>
             </div>
@@ -499,16 +499,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 <button
                   onClick={fetchAdminData}
                   disabled={isLoadingData}
-                  className="p-2.5 rounded-xl bg-gray-800/90 hover:bg-gray-700 text-gray-300 hover:text-white transition-all text-xs font-semibold flex items-center gap-1.5 border border-gray-700"
+                  className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-all text-xs font-semibold flex items-center gap-1.5 border border-[#7CFF00]/15 cursor-pointer"
                   title="Refresh metrics"
                 >
-                  <RefreshCw className={`w-4 h-4 ${isLoadingData ? 'animate-spin text-cyan-400' : ''}`} />
+                  <RefreshCw className={`w-4 h-4 ${isLoadingData ? 'animate-spin text-[#7CFF00]' : ''}`} />
                   <span className="hidden sm:inline">Sync Data</span>
                 </button>
 
                 <button
                   onClick={handleAdminLogout}
-                  className="p-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 transition-all text-xs font-semibold flex items-center gap-1.5 border border-red-800/40"
+                  className="p-2.5 rounded-xl bg-red-950/40 hover:bg-red-900/60 text-red-300 transition-all text-xs font-semibold flex items-center gap-1.5 border border-red-800/40 cursor-pointer"
                   title="Logout from Admin"
                 >
                   <LogOut className="w-4 h-4" />
@@ -522,7 +522,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                 soundManager.playClickSound();
                 onClose();
               }}
-              className="p-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white transition-all"
+              className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all cursor-pointer border border-white/10"
             >
               <X className="w-5 h-5" />
             </button>
@@ -530,44 +530,44 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
         </div>
 
         {/* Body Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#070A12]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-[#020805]">
           
           {/* STATE 1: Not Authenticated -> Show Admin Login Form with Details */}
           {!isAdminAuthenticated ? (
             <div className="max-w-md mx-auto py-8 sm:py-12 space-y-6">
               
               <div className="text-center space-y-2">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 p-[2px] mx-auto shadow-xl shadow-cyan-950/50">
-                  <div className="w-full h-full bg-[#0E1322] rounded-[14px] flex items-center justify-center text-cyan-400">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#7CFF00] to-[#00B83D] p-[2px] mx-auto shadow-xl shadow-[#7CFF00]/20">
+                  <div className="w-full h-full bg-[#071A0C] rounded-[14px] flex items-center justify-center text-[#7CFF00]">
                     <KeyRound className="w-8 h-8" />
                   </div>
                 </div>
                 <h3 className="text-2xl font-black text-white font-display">
                   Admin Gateway Login
                 </h3>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-[#A8B5AB]">
                   Restricted portal for platform administrators and financial ledger controllers.
                 </p>
               </div>
 
               {/* Login Credentials Box Provided For Admin */}
-              <div className="p-4 rounded-2xl bg-cyan-950/30 border border-cyan-800/50 space-y-2 text-xs">
+              <div className="p-4 rounded-2xl bg-[#063B16]/40 border border-[#7CFF00]/30 space-y-2 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-cyan-300 flex items-center gap-1.5">
+                  <span className="font-bold text-[#7CFF00] flex items-center gap-1.5">
                     <Shield className="w-3.5 h-3.5" />
                     Admin Login Credentials
                   </span>
                   <button
                     type="button"
                     onClick={handleFillDemoAdmin}
-                    className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 font-bold text-[11px] border border-cyan-500/40 transition-all"
+                    className="px-2.5 py-1 rounded-lg bg-[#7CFF00]/20 hover:bg-[#7CFF00]/30 text-[#7CFF00] font-bold text-[11px] border border-[#7CFF00]/40 transition-all cursor-pointer"
                   >
                     Auto-Fill Credentials
                   </button>
                 </div>
                 <div className="space-y-1 font-mono text-[12px] text-gray-300">
                   <p>• Username: <strong className="text-white">admin@9japay.com.ng</strong> (or <strong className="text-white">admin</strong>)</p>
-                  <p>• Password: <strong className="text-amber-400">admin9japay2025</strong></p>
+                  <p>• Password: <strong className="text-[#FFB800]">admin9japay2025</strong></p>
                 </div>
               </div>
 
@@ -587,7 +587,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     value={adminUsername}
                     onChange={(e) => setAdminUsername(e.target.value)}
                     placeholder="admin@9japay.com.ng"
-                    className="w-full px-4 py-3 rounded-xl bg-black/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 text-sm font-mono"
+                    className="w-full px-4 py-3 rounded-xl bg-black/60 border border-[#7CFF00]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#7CFF00] text-sm font-mono"
                   />
                 </div>
 
@@ -599,14 +599,14 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                     value={adminPassword}
                     onChange={(e) => setAdminPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full px-4 py-3 rounded-xl bg-black/60 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500 text-sm"
+                    className="w-full px-4 py-3 rounded-xl bg-black/60 border border-[#7CFF00]/20 text-white placeholder-gray-500 focus:outline-none focus:border-[#7CFF00] text-sm"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isLoggingIn}
-                  className="w-full py-4 rounded-xl bg-gradient-to-r from-cyan-600 via-indigo-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold text-sm shadow-xl shadow-cyan-950/50 hover:scale-[1.01] transition-all flex items-center justify-center gap-2"
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] text-black font-black text-sm shadow-xl shadow-[#7CFF00]/20 hover:opacity-95 hover:scale-[1.01] transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Lock className="w-4 h-4" />
                   <span>{isLoggingIn ? 'Authenticating...' : 'Access Admin Dashboard'}</span>
@@ -618,16 +618,16 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
             <div className="space-y-6">
               
               {/* Top Navigation Tabs */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-gray-800 scrollbar-none">
+              <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[#7CFF00]/15 scrollbar-none">
                 {[
                   { id: 'overview', label: 'Executive Overview', icon: <TrendingUp className="w-4 h-4" />, count: null },
-                  { id: 'content_hub', label: 'Tasks & Quizzes Manager', icon: <HelpCircle className="w-4 h-4 text-purple-400" />, count: null },
-                  { id: 'paid_premium', label: 'VIP Premium Payments', icon: <Award className="w-4 h-4 text-amber-400" />, count: adminData?.pendingUpgrades.length || 0 },
+                  { id: 'content_hub', label: 'Tasks & Quizzes Manager', icon: <HelpCircle className="w-4 h-4 text-[#7CFF00]" />, count: null },
+                  { id: 'paid_premium', label: 'VIP Premium Payments', icon: <Award className="w-4 h-4 text-[#FFB800]" />, count: adminData?.pendingUpgrades.length || 0 },
                   { id: 'withdrawals', label: 'Withdrawals Oversight', icon: <ArrowUpRight className="w-4 h-4 text-rose-400" />, count: adminData?.withdrawals?.filter(w => w.status === 'PENDING').length || 0 },
-                  { id: 'users', label: 'Registered Users', icon: <Users className="w-4 h-4 text-cyan-400" />, count: adminData?.allUsers.length || 0 },
+                  { id: 'users', label: 'Registered Users', icon: <Users className="w-4 h-4 text-[#7CFF00]" />, count: adminData?.allUsers.length || 0 },
                   { id: 'leaderboard', label: 'Referral Champions', icon: <Trophy className="w-4 h-4 text-yellow-400" />, count: null },
-                  { id: 'login_logs', label: 'Live Sign-In Logs', icon: <Activity className="w-4 h-4 text-emerald-400" />, count: adminData?.loginLogs.length || 0 },
-                  { id: 'settings', label: 'Gateway Settings', icon: <Sliders className="w-4 h-4 text-purple-400" />, count: null },
+                  { id: 'login_logs', label: 'Live Sign-In Logs', icon: <Activity className="w-4 h-4 text-[#22C55E]" />, count: adminData?.loginLogs.length || 0 },
+                  { id: 'settings', label: 'Gateway Settings', icon: <Sliders className="w-4 h-4 text-[#7CFF00]" />, count: null },
                 ].map((t) => (
                   <button
                     key={t.id}
@@ -635,17 +635,17 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
                       soundManager.playClickSound();
                       setActiveTab(t.id as unknown as typeof activeTab);
                     }}
-                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
                       activeTab === t.id
-                        ? 'bg-gradient-to-r from-cyan-600 to-indigo-600 text-white shadow-lg shadow-cyan-950/50'
-                        : 'bg-gray-900/80 text-gray-400 hover:text-white border border-gray-800 hover:border-gray-700'
+                        ? 'bg-[#063B16] text-[#7CFF00] border border-[#7CFF00] shadow-lg shadow-[#7CFF00]/10'
+                        : 'bg-[#071A0C] text-[#A8B5AB] hover:text-white border border-[#7CFF00]/15 hover:border-[#7CFF00]/30'
                     }`}
                   >
                     {t.icon}
                     <span>{t.label}</span>
                     {t.count !== null && (
                       <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono font-black ${
-                        (t.id === 'paid_premium' || t.id === 'withdrawals') && t.count > 0 ? 'bg-amber-500 text-black animate-pulse' : 'bg-black/40 text-gray-300'
+                        (t.id === 'paid_premium' || t.id === 'withdrawals') && t.count > 0 ? 'bg-[#FFB800] text-black animate-pulse' : 'bg-black/40 text-gray-300'
                       }`}>
                         {t.count}
                       </span>

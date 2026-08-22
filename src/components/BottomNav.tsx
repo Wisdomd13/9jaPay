@@ -36,7 +36,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({ user, activeTab, setActive
 
   return (
     <div className="md:hidden fixed bottom-3 left-0 right-0 z-40 px-3 max-w-md mx-auto pointer-events-none">
-      <div className="pointer-events-auto bg-[#120E1A]/95 border border-purple-900/40 p-1.5 rounded-3xl flex justify-around items-center h-16 shadow-2xl backdrop-blur-xl">
+      <div className="pointer-events-auto bg-[#071A0C]/95 border border-[#7CFF00]/25 p-1.5 rounded-3xl flex justify-around items-center h-16 shadow-2xl backdrop-blur-xl">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
 
@@ -49,12 +49,12 @@ export const BottomNav: React.FC<BottomNavProps> = ({ user, activeTab, setActive
                   isActive ? 'scale-105' : 'hover:scale-105'
                 }`}
               >
-                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-400 flex items-center justify-center text-white shadow-lg shadow-purple-950/60 p-[1.5px]">
-                  <div className="w-full h-full rounded-full bg-[#120E1A] flex items-center justify-center text-amber-300">
-                    <Zap className="w-5 h-5 fill-amber-300" />
+                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#7CFF00] via-[#39E600] to-[#00B83D] flex items-center justify-center text-black shadow-lg shadow-[#7CFF00]/30 p-[1.5px]">
+                  <div className="w-full h-full rounded-full bg-[#071A0C] flex items-center justify-center text-[#7CFF00]">
+                    <Zap className="w-5 h-5 fill-[#7CFF00]" />
                   </div>
                 </div>
-                <span className="text-[9px] font-bold text-amber-300 mt-0.5">Quiz</span>
+                <span className="text-[9px] font-bold text-[#7CFF00] mt-0.5">Quiz</span>
               </button>
             );
           }
@@ -65,11 +65,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ user, activeTab, setActive
               onClick={() => handleTabClick(tab.id)}
               className={`flex flex-col items-center justify-center py-1 px-2.5 rounded-2xl transition-all ${
                 isActive
-                  ? 'text-purple-400 font-bold'
-                  : 'text-gray-400 hover:text-gray-200'
+                  ? 'text-[#7CFF00] font-black'
+                  : 'text-[#A8B5AB] hover:text-white'
               }`}
             >
-              <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-purple-600/30 text-purple-300 border border-purple-500/30' : ''}`}>
+              <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-[#7CFF00]/15 text-[#7CFF00] border border-[#7CFF00]/30' : ''}`}>
                 {tab.icon}
               </div>
               <span className="text-[10px] mt-0.5">{tab.label}</span>

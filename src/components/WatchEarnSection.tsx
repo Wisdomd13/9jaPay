@@ -113,21 +113,21 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
         <div>
           <div className="flex items-center gap-2 flex-wrap">
             <h2 className="text-xl sm:text-2xl font-black text-white font-display flex items-center gap-2">
-              <Youtube className="w-6 h-6 text-red-500" />
+              <Youtube className="w-6 h-6 text-[#7CFF00]" />
               Watch & Earn Videos
             </h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-400 font-bold border border-red-500/30 flex items-center gap-1">
-              <Flame className="w-3 h-3 fill-red-400" /> {user.tier === 'PREMIUM' ? '₦1,000 / Video (VIP)' : '₦500 / Video (Free)'}
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#063B16] text-[#7CFF00] font-bold border border-[#7CFF00]/30 flex items-center gap-1">
+              <Flame className="w-3 h-3 text-[#7CFF00]" /> {user.tier === 'PREMIUM' ? '₦1,000 / Video (VIP)' : '₦500 / Video (Free)'}
             </span>
             <span className={`text-xs px-2.5 py-0.5 rounded-full font-extrabold border ${
               isCapped 
                 ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' 
-                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                : 'bg-[#063B16] text-[#7CFF00] border-[#7CFF00]/30'
             }`}>
               {completedCount}/{dailyLimit} Watched Today {isCapped ? '(Daily Cap Reached)' : ''}
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#A8B5AB] mt-1">
             Watch curated videos for the required time and receive instant cash (₦{user.tier === 'PREMIUM' ? '1,000' : '500'} per video) in your 9jaPay wallet.
           </p>
         </div>
@@ -141,10 +141,10 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
                 soundManager.playClickSound();
                 setSelectedCategory(cat);
               }}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedCategory === cat
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-900/40'
-                  : 'bg-gray-900/80 text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                  ? 'bg-[#063B16] text-[#7CFF00] border border-[#7CFF00] shadow-md shadow-[#7CFF00]/20'
+                  : 'bg-[#071A0C] border border-[#7CFF00]/10 text-gray-400 hover:text-white hover:border-[#7CFF00]/30'
               }`}
             >
               {cat}
@@ -161,16 +161,16 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
             <div
               key={task.id}
               onClick={() => handleOpenVideo(task)}
-              className={`group relative overflow-hidden rounded-2xl bg-[#121522] border transition-all cursor-pointer ${
+              className={`group relative overflow-hidden rounded-2xl bg-[#071A0C] border transition-all cursor-pointer ${
                 task.isCompleted
-                  ? 'border-emerald-500/40 opacity-80'
+                  ? 'border-[#22C55E]/40 opacity-80'
                   : isLocked
                   ? 'border-amber-500/30 hover:border-amber-500/60'
-                  : 'border-gray-800 hover:border-purple-500/60 hover:shadow-xl hover:shadow-purple-950/20 hover:-translate-y-1'
+                  : 'border-[#7CFF00]/15 hover:border-[#7CFF00] hover:shadow-xl hover:shadow-[#7CFF00]/10 hover:-translate-y-1'
               }`}
             >
               {/* Thumbnail Container */}
-              <div className="relative aspect-video w-full overflow-hidden bg-gray-900">
+              <div className="relative aspect-video w-full overflow-hidden bg-black">
                 <img
                   src={task.thumbnailUrl}
                   alt={task.title}
@@ -179,7 +179,7 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
                 />
 
                 {/* Overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-[#121522] via-transparent to-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#071A0C] via-transparent to-black/40" />
 
                 {/* Status Badges */}
                 <div className="absolute top-3 left-3 flex items-center gap-1.5">
@@ -187,7 +187,7 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
                     {task.category}
                   </span>
                   {task.isPremiumOnly && (
-                    <span className="px-2 py-0.5 rounded-md bg-amber-500/90 text-black text-[10px] font-extrabold flex items-center gap-1 shadow-sm">
+                    <span className="px-2 py-0.5 rounded-md bg-[#FFB800] text-black text-[10px] font-black flex items-center gap-1 shadow-sm">
                       <Sparkles className="w-2.5 h-2.5" /> VIP ONLY
                     </span>
                   )}
@@ -202,16 +202,16 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
                 {/* Center Play or Lock Icon */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   {task.isCompleted ? (
-                    <div className="w-12 h-12 rounded-full bg-emerald-500/90 text-white flex items-center justify-center shadow-lg shadow-emerald-950/50">
+                    <div className="w-12 h-12 rounded-full bg-[#22C55E] text-black flex items-center justify-center shadow-lg shadow-emerald-950/50">
                       <CheckCircle className="w-6 h-6" />
                     </div>
                   ) : isLocked ? (
-                    <div className="w-12 h-12 rounded-full bg-amber-500/90 text-black flex items-center justify-center shadow-lg shadow-amber-950/50 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-full bg-[#FFB800] text-black flex items-center justify-center shadow-lg shadow-amber-950/50 group-hover:scale-110 transition-transform">
                       <Lock className="w-6 h-6" />
                     </div>
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-red-600/90 text-white flex items-center justify-center shadow-lg shadow-red-950/50 group-hover:scale-110 transition-transform">
-                      <Play className="w-5 h-5 fill-white ml-0.5" />
+                    <div className="w-12 h-12 rounded-full bg-[#7CFF00] text-black flex items-center justify-center shadow-lg shadow-[#7CFF00]/30 group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 fill-black ml-0.5" />
                     </div>
                   )}
                 </div>
@@ -219,20 +219,20 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
 
               {/* Card Body */}
               <div className="p-4 space-y-2.5">
-                <p className="text-xs text-purple-400 font-medium">
+                <p className="text-xs text-[#7CFF00] font-semibold">
                   {task.channelName}
                 </p>
-                <h3 className="text-sm font-bold text-white line-clamp-2 group-hover:text-purple-300 transition-colors">
+                <h3 className="text-sm font-bold text-white line-clamp-2 group-hover:text-[#7CFF00] transition-colors">
                   {task.title}
                 </h3>
 
-                <div className="pt-2 border-t border-gray-800/80 flex items-center justify-between">
-                  <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                <div className="pt-2 border-t border-[#7CFF00]/10 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs text-[#A8B5AB]">
                     <Clock className="w-3.5 h-3.5 text-gray-500" />
                     <span>Watch {task.requiredWatchSeconds}s</span>
                   </div>
 
-                  <div className="flex items-center gap-1 text-emerald-400 font-extrabold text-sm">
+                  <div className="flex items-center gap-1 text-[#7CFF00] font-black text-sm">
                     <span>+₦{user.tier === 'PREMIUM' ? '1,000' : '500'}</span>
                   </div>
                 </div>
@@ -244,13 +244,13 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
 
       {/* Interactive YouTube Video Player Modal */}
       {activeVideo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-          <div className="relative w-full max-w-3xl rounded-3xl bg-[#121524] border border-purple-800/40 overflow-hidden shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
+          <div className="relative w-full max-w-3xl rounded-3xl bg-[#071A0C] border border-[#7CFF00]/30 overflow-hidden shadow-2xl">
             
             {/* Header */}
-            <div className="p-4 sm:p-5 border-b border-gray-800 flex items-center justify-between">
+            <div className="p-4 sm:p-5 border-b border-[#7CFF00]/10 flex items-center justify-between">
               <div>
-                <span className="text-xs text-purple-400 font-semibold">{activeVideo.category}</span>
+                <span className="text-xs text-[#7CFF00] font-semibold">{activeVideo.category}</span>
                 <h3 className="text-base sm:text-lg font-bold text-white line-clamp-1">{activeVideo.title}</h3>
               </div>
               <button
@@ -258,7 +258,7 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
                   soundManager.playClickSound();
                   setActiveVideo(null);
                 }}
-                className="p-2 rounded-xl bg-gray-800/80 hover:bg-gray-700 text-gray-400 hover:text-white"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -276,20 +276,20 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
             </div>
 
             {/* Watch Timer & Reward Claim Bar */}
-            <div className="p-4 sm:p-6 bg-[#0E111C] space-y-4">
+            <div className="p-4 sm:p-6 bg-[#040F07] space-y-4">
               <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-gray-300 font-medium">
+                <span className="text-[#A8B5AB] font-medium">
                   Watch Time Required: <strong className="text-white">{activeVideo.requiredWatchSeconds}s</strong>
                 </span>
-                <span className="font-mono text-purple-400 font-bold">
+                <span className="font-mono text-[#7CFF00] font-bold">
                   {watchSeconds}s / {activeVideo.requiredWatchSeconds}s
                 </span>
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-gray-800 h-2.5 rounded-full overflow-hidden">
+              <div className="w-full bg-black/60 h-2.5 rounded-full overflow-hidden border border-[#7CFF00]/10">
                 <div
-                  className="bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400 h-full rounded-full transition-all duration-300"
+                  className="bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] h-full rounded-full transition-all duration-300"
                   style={{
                     width: `${Math.min(100, (watchSeconds / activeVideo.requiredWatchSeconds) * 100)}%`
                   }}
@@ -298,15 +298,15 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
 
               {/* Action */}
               <div className="flex items-center justify-between pt-2">
-                <div className="text-xs text-gray-400">
+                <div className="text-xs text-[#A8B5AB]">
                   Reward:{' '}
-                  <span className="text-emerald-400 font-bold text-sm">
+                  <span className="text-[#7CFF00] font-bold text-sm">
                     +₦{user.tier === 'PREMIUM' ? '1,000' : '500'}
                   </span>
                 </div>
 
                 {activeVideo.isCompleted ? (
-                  <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-sm bg-emerald-500/10 px-4 py-2 rounded-xl border border-emerald-500/20">
+                  <div className="flex items-center gap-1.5 text-[#22C55E] font-bold text-sm bg-[#063B16] px-4 py-2 rounded-xl border border-[#22C55E]/30">
                     <CheckCircle className="w-4 h-4" />
                     <span>Reward Already Claimed</span>
                   </div>
@@ -314,7 +314,7 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
                   <button
                     onClick={handleClaimReward}
                     disabled={claiming}
-                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-sm shadow-lg shadow-emerald-950/50 animate-pulse hover:scale-105 transition-all"
+                    className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] hover:opacity-95 text-black font-black text-sm shadow-lg shadow-[#7CFF00]/20 animate-pulse hover:scale-105 transition-all cursor-pointer"
                   >
                     <Award className="w-4 h-4" />
                     <span>{claiming ? 'Claiming...' : `Claim ₦${user.tier === 'PREMIUM' ? '1,000' : '500'}`}</span>
