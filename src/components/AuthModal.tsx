@@ -364,8 +364,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div>
             {/* Top Logo Badge Container */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="relative w-16 h-16 rounded-2xl p-[1px] bg-gradient-to-tr from-purple-600/60 via-amber-500/40 to-indigo-600/60 shadow-lg shadow-purple-950/40 mb-3 flex items-center justify-center">
-                <div className="w-full h-full rounded-2xl bg-gradient-to-b from-[#1E162B] to-[#120E1A] flex items-center justify-center p-2">
+              <div className="relative w-16 h-16 rounded-2xl p-[1px] bg-gradient-to-tr from-emerald-500/60 via-lime-400/40 to-purple-600/60 shadow-lg shadow-emerald-950/40 mb-3 flex items-center justify-center">
+                <div className="w-full h-full rounded-2xl bg-gradient-to-b from-[#121A15] to-[#0A0D10] flex items-center justify-center p-2.5">
                   <NineJaPayLogo size="md" showText={false} />
                 </div>
               </div>

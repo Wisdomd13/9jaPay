@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
 import { NineJaPayLogo } from './NineJaPayLogo';
-import appLogo from '../assets/images/9japay_logo_1787151742060.jpg';
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -84,21 +83,13 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16 sm:h-20">
           
           {/* Logo Area */}
-          <div className="flex items-center gap-3 cursor-pointer select-none" onClick={handleLogoClick}>
-            <NineJaPayLogo size="md" showText={false} />
-
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xl sm:text-2xl font-black font-display tracking-tight text-white">
-                  9ja<span className="text-amber-400">Pay</span>
-                </span>
-                {user?.tier === 'PREMIUM' && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/30 flex items-center gap-0.5">
-                    <Crown className="w-2.5 h-2.5 fill-amber-300" /> VIP
-                  </span>
-                )}
-              </div>
-            </div>
+          <div className="flex items-center gap-2 cursor-pointer select-none" onClick={handleLogoClick}>
+            <NineJaPayLogo size="md" showText={true} />
+            {user?.tier === 'PREMIUM' && (
+              <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/30 flex items-center gap-0.5 ml-1">
+                <Crown className="w-2.5 h-2.5 fill-amber-300" /> VIP
+              </span>
+            )}
           </div>
 
           {/* Desktop Navigation Links */}

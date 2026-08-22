@@ -1,24 +1,43 @@
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import { UserProfile } from '../types';
 
-// Helper to validate valid HTTP/HTTPS URL
-function getValidSupabaseUrl(url?: string): string {
+/**
+ * Sanitizes and validates the Supabase URL:
+ * - Trims whitespace
+ * - Prepends 'https://' if protocol is missing
+ * - Strips any trailing slashes (e.g. .replace(/\/+$/, ''))
+ * - Validates with standard URL parser
+ */
+export function sanitizeSupabaseUrl(url?: string): string {
   if (!url || typeof url !== 'string') return 'https://placeholder.supabase.co';
-  const trimmed = url.trim();
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    try {
-      new URL(trimmed);
-      return trimmed;
-    } catch {
+  let trimmed = url.trim();
+  if (!trimmed) return 'https://placeholder.supabase.co';
+
+  // Explicitly prepend https:// if missing
+  if (!/^https?:\/\//i.test(trimmed)) {
+    trimmed = `https://${trimmed.replace(/^\/+/, '')}`;
+  }
+
+  // Strip any trailing slashes
+  trimmed = trimmed.replace(/\/+$/, '');
+
+  try {
+    const parsed = new URL(trimmed);
+    if (!parsed.hostname) {
       return 'https://placeholder.supabase.co';
     }
+    return trimmed;
+  } catch {
+    return 'https://placeholder.supabase.co';
   }
-  return 'https://placeholder.supabase.co';
 }
 
-function getValidAnonKey(key?: string): string {
+/**
+ * Sanitizes and validates the Supabase Anon Key
+ */
+export function sanitizeAnonKey(key?: string): string {
   if (!key || typeof key !== 'string' || key.trim() === '') {
-    // Valid format placeholder key
+    // Valid format placeholder key for fallback
     return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2MDAwMDAwMDAsImV4cCI6MTkwMDAwMDAwMH0.placeholder';
   }
   return key.trim();
@@ -27,24 +46,25 @@ function getValidAnonKey(key?: string): string {
 const rawUrl = import.meta.env.VITE_SUPABASE_URL;
 const rawAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+export const supabaseUrl: string = sanitizeSupabaseUrl(rawUrl);
+export const supabaseAnonKey: string = sanitizeAnonKey(rawAnonKey);
+
 export const isSupabaseConfigured: boolean = Boolean(
   rawUrl &&
   typeof rawUrl === 'string' &&
-  (rawUrl.startsWith('https://') || rawUrl.startsWith('http://')) &&
+  rawUrl.trim() !== '' &&
   !rawUrl.includes('placeholder') &&
   !rawUrl.includes('YOUR_SUPABASE') &&
   rawAnonKey &&
   typeof rawAnonKey === 'string' &&
+  rawAnonKey.trim() !== '' &&
   !rawAnonKey.includes('placeholder')
 );
 
-const finalUrl = getValidSupabaseUrl(rawUrl);
-const finalAnonKey = getValidAnonKey(rawAnonKey);
-
-// Safely instantiate Supabase client with guaranteed valid URL format
+// Standard Supabase client instantiation with clean sanitized URL & standard options
 export const supabase: SupabaseClient = createClient(
-  finalUrl,
-  finalAnonKey,
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,
