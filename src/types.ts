@@ -1,5 +1,15 @@
 export type MembershipTier = 'FREE' | 'PREMIUM';
 
+export interface DownlineMember {
+  id: string;
+  username: string;
+  fullName: string;
+  tier: MembershipTier;
+  tasksCompleted: number;
+  bonusEarned: number; // ₦6,000 for VIP upgrade, ₦0 for Free
+  joinedAt: string;
+}
+
 export interface UserProfile {
   id: string;
   fullName: string;
@@ -16,6 +26,7 @@ export interface UserProfile {
   referredBy?: string;
   lockedReferralCommission?: number; // ₦6,000 VIP commissions locked until user upgrades
   vipReferralsCount?: number; // count of referred friends who became VIP
+  downlines?: DownlineMember[];
   loanBalance: number;
   loanLimit: number;
   bankDetails?: {

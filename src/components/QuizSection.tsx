@@ -75,14 +75,14 @@ export const QuizSection: React.FC<QuizSectionProps> = ({
       });
 
       if (res.isCorrect) {
-        soundManager.playSuccessSound();
+        soundManager.speakQuizCorrect();
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 }
         });
       } else {
-        soundManager.playClickSound();
+        soundManager.speakQuizWrong();
       }
     } catch {
       // Error handled upstream

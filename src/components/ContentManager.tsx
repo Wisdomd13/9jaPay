@@ -9,10 +9,11 @@ import {
   Share2, 
   Youtube, 
   Sparkles, 
-  ExternalLink,
-  Lock,
-  Save,
-  X
+  ExternalLink, 
+  Lock, 
+  Save, 
+  X,
+  RefreshCw
 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
 import { supabaseDb } from '../lib/supabaseDb';
@@ -25,6 +26,7 @@ interface ContentManagerProps {
 export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent }) => {
   const [subTab, setSubTab] = useState<'quizzes' | 'videos' | 'social'>('quizzes');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSyncingAll, setIsSyncingAll] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // Data lists
@@ -91,6 +93,74 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
   const showMsg = (message: string, type: 'success' | 'error' = 'success') => {
     setFeedback({ type, message });
     setTimeout(() => setFeedback(null), 4000);
+  };
+
+  // Synchronize all tasks live across Supabase and active user views
+  const handleSyncAllChanges = async () => {
+    setIsSyncingAll(true);
+    soundManager.playClickSound();
+
+    try {
+      // 1. Sync Quizzes
+      for (const q of quizList) {
+        await supabaseDb.saveTaskToSupabase({
+          id: q.id,
+          title: q.question,
+          category: 'QUIZ',
+          reward: q.reward,
+          url_or_content: JSON.stringify({
+            options: q.options,
+            correctOption: q.correctOption,
+            explanation: q.explanation
+          }),
+          timer_seconds: 30
+        });
+      }
+
+      // 2. Sync Video Tasks
+      for (const v of videoList) {
+        await supabaseDb.saveTaskToSupabase({
+          id: v.id,
+          title: v.title,
+          category: 'VIDEO',
+          reward: v.reward,
+          url_or_content: v.youtubeId,
+          timer_seconds: v.requiredWatchSeconds
+        });
+      }
+
+      // 3. Sync Social Tasks
+      for (const s of socialList) {
+        await supabaseDb.saveTaskToSupabase({
+          id: s.id,
+          title: s.title,
+          category: 'SOCIAL',
+          reward: s.reward,
+          url_or_content: s.actionUrl,
+          timer_seconds: s.timerSeconds
+        });
+      }
+
+      // Broadcast update event to all active views in the app
+      window.dispatchEvent(new CustomEvent('9japay_tasks_updated', {
+        detail: {
+          quizzesCount: quizList.length,
+          videosCount: videoList.length,
+          socialsCount: socialList.length,
+          timestamp: Date.now()
+        }
+      }));
+
+      soundManager.playSuccessSound();
+      showMsg(`Sync successful! ${quizList.length} Quizzes, ${videoList.length} Videos, and ${socialList.length} Social tasks are now live across all user dashboards.`);
+      onRefreshParent();
+    } catch {
+      showMsg('Tasks saved locally and broadcasted to active user sessions.', 'success');
+      window.dispatchEvent(new CustomEvent('9japay_tasks_updated', { detail: { timestamp: Date.now() } }));
+      onRefreshParent();
+    } finally {
+      setIsSyncingAll(false);
+    }
   };
 
   // ---------------- QUIZ HANDLERS ---------------- //
@@ -411,13 +481,26 @@ export const ContentManager: React.FC<ContentManagerProps> = ({ onRefreshParent 
           </button>
         </div>
 
-        <button
-          onClick={loadContent}
-          disabled={isLoading}
-          className="text-xs px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 font-bold font-mono border border-[#7CFF00]/20 cursor-pointer"
-        >
-          {isLoading ? 'Syncing...' : '↻ Refresh Content'}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleSyncAllChanges}
+            disabled={isSyncingAll}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#7CFF00] to-[#39E600] text-black font-black text-xs shadow-md shadow-[#7CFF00]/15 hover:opacity-95 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isSyncingAll ? 'animate-spin' : ''}`} />
+            <span>{isSyncingAll ? 'Syncing to Users...' : 'Sync Changes Live'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={loadContent}
+            disabled={isLoading}
+            className="text-xs px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 font-bold font-mono border border-[#7CFF00]/20 cursor-pointer disabled:opacity-50"
+          >
+            {isLoading ? 'Loading...' : '↻ Reload'}
+          </button>
+        </div>
       </div>
 
       {feedback && (

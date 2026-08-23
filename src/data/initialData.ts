@@ -36,7 +36,7 @@ export const INITIAL_VIDEO_TASKS: VideoTask[] = [
     title: 'Top 5 Side Hustles for Nigerian Students and Tech Beginners',
     channelName: 'Naija Tech Hub',
     youtubeId: 'L_LUpnjgPso',
-    reward: 500,
+    reward: 1000,
     durationSeconds: 180,
     requiredWatchSeconds: 45,
     category: 'Tutorial',
@@ -49,7 +49,7 @@ export const INITIAL_VIDEO_TASKS: VideoTask[] = [
     title: 'Crypto Arbitrage Trading in Nigeria & Instant Bank Withdrawal Secret',
     channelName: 'Crypto Naija Masterclass',
     youtubeId: 'kJQP7kiw5Fk',
-    reward: 500,
+    reward: 1000,
     durationSeconds: 240,
     requiredWatchSeconds: 60,
     category: 'Crypto',
@@ -62,7 +62,7 @@ export const INITIAL_VIDEO_TASKS: VideoTask[] = [
     title: 'High-Ticket Affiliate Marketing Blueprint for 2026',
     channelName: 'Global Hustlers Africa',
     youtubeId: 'fJ9rUzIMcZQ',
-    reward: 500,
+    reward: 1000,
     durationSeconds: 300,
     requiredWatchSeconds: 90,
     category: 'Tech',
@@ -75,7 +75,7 @@ export const INITIAL_VIDEO_TASKS: VideoTask[] = [
     title: 'E-commerce Dropshipping in Lagos with 0 Capital',
     channelName: 'Biz Growth NG',
     youtubeId: '9bZkp7q19f0',
-    reward: 500,
+    reward: 1000,
     durationSeconds: 150,
     requiredWatchSeconds: 40,
     category: 'Finance',
@@ -143,24 +143,24 @@ export const INITIAL_SOCIAL_TASKS: SocialTask[] = [
   },
   {
     id: 'soc-6',
-    title: 'Daily Sponsored Ad Click & Verification',
+    title: 'Daily Premium Sponsored Ad Click & Verification',
     platform: 'Website / Ad',
     actionType: 'visit',
-    reward: 500,
+    reward: 1000,
     actionUrl: 'https://google.com',
     timerSeconds: 10,
-    isPremiumOnly: false,
-    instructions: 'Click the partner link and complete the quick 10-second verification visit.'
+    isPremiumOnly: true,
+    instructions: 'Click the partner link and complete the quick 10-second VIP verification visit.'
   },
   {
     id: 'soc-7',
-    title: 'Quick Micro-Task: Share 9jaPay on Social Feed',
+    title: 'VIP Micro-Task: Share 9jaPay on Social Feed',
     platform: 'Twitter / X',
     actionType: 'like',
-    reward: 500,
+    reward: 1000,
     actionUrl: 'https://twitter.com',
     timerSeconds: 10,
-    isPremiumOnly: false,
+    isPremiumOnly: true,
     instructions: 'Retweet or like the sponsored payment proof update.'
   }
 ];
@@ -238,15 +238,15 @@ export const INITIAL_QUIZ_QUESTIONS: QuizQuestion[] = [
   },
   {
     id: 'quiz-6',
-    question: 'What is the standard referral bonus reward on 9jaPay for bringing an active Premium member?',
+    question: 'What is the referral commission reward on 9jaPay when a referee upgrades to VIP?',
     options: {
-      A: '₦500',
-      B: '₦1,000',
-      C: '₦1,500',
-      D: '₦5,000'
+      A: '₦2,000',
+      B: '₦5,000',
+      C: '₦10,000',
+      D: '₦15,000'
     },
     correctOption: 'C',
-    explanation: '9jaPay offers a generous ₦1,500 direct referral commission for every upgraded affiliate member!',
+    explanation: '9jaPay offers a ₦10,000 direct VIP referral commission for every upgraded affiliate member!',
     reward: 500,
     category: '9jaPay Trivia'
   },

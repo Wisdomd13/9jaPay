@@ -77,6 +77,7 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
       return;
     }
     if (task.isPremiumOnly && user.tier !== 'PREMIUM') {
+      soundManager.speakPremiumLocked();
       onOpenUpgrade();
       return;
     }
@@ -88,7 +89,7 @@ export const WatchEarnSection: React.FC<WatchEarnSectionProps> = ({
   const handleClaimReward = async () => {
     if (!activeVideo || claiming) return;
     setClaiming(true);
-    soundManager.playRewardSound();
+    soundManager.speakTaskCompleted();
 
     try {
       await onCompleteTask(activeVideo.id, 'video');

@@ -15,8 +15,8 @@ import { WithdrawModal } from './components/WithdrawModal';
 import { AuthModal } from './components/AuthModal';
 import { AdminPanel } from './components/AdminPanel';
 import { LandingPage } from './components/LandingPage';
-import { BottomNav } from './components/BottomNav';
 import { BentoDashboard } from './components/BentoDashboard';
+import { ProfileSection } from './components/ProfileSection';
 import { soundManager } from './utils/audio';
 import { supabase, mapSupabaseUserToProfile } from './lib/supabase';
 import { supabaseDb } from './lib/supabaseDb';
@@ -247,6 +247,15 @@ export default function App() {
 
   useEffect(() => {
     fetchUserData();
+
+    const handleTasksUpdated = () => {
+      fetchUserData();
+    };
+
+    window.addEventListener('9japay_tasks_updated', handleTasksUpdated);
+    return () => {
+      window.removeEventListener('9japay_tasks_updated', handleTasksUpdated);
+    };
   }, [fetchUserData]);
 
   // Complete a Task (Video or Social)
@@ -729,6 +738,19 @@ export default function App() {
               />
             )}
 
+            {/* Profile Dedicated Tab */}
+            {activeTab === 'profile' && (
+              <ProfileSection
+                user={user}
+                onUpdateUser={(updatedUser) => {
+                  setUser(updatedUser);
+                  localStorage.setItem('9japay_user', JSON.stringify(updatedUser));
+                }}
+                onBack={() => handleSelectTab('dashboard')}
+                onOpenUpgrade={() => setIsUpgradeOpen(true)}
+              />
+            )}
+
             {/* Transactions History Tab */}
             {activeTab === 'history' && (
               <TransactionsHistory transactions={transactions} />
@@ -750,14 +772,6 @@ export default function App() {
           </div>
         </div>
       </footer>
-
-      {/* Mobile Bottom Dock Bar */}
-      <BottomNav
-        user={user}
-        activeTab={activeTab}
-        setActiveTab={handleSelectTab}
-        onOpenAuth={handleOpenAuth}
-      />
 
       {/* Modals */}
       {user && (

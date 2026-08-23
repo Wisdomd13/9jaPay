@@ -98,3 +98,45 @@ export function mapSupabaseUserToProfile(sbUser: User, existingProfile?: UserPro
     upgradeStatus: 'NONE'
   };
 }
+
+export const supabaseDb = {
+  async fetchAllUsers(): Promise<UserProfile[]> {
+    try {
+      const { data, error } = await supabase.from('profiles').select('*');
+      if (error || !data) return [];
+      return data.map((d: any) => ({
+        id: d.id,
+        fullName: d.full_name || d.fullName || 'Member',
+        username: d.username || 'user',
+        email: d.email || '',
+        phone: d.phone || '',
+        tier: d.tier || 'FREE',
+        walletBalance: d.wallet_balance ?? d.walletBalance ?? 0,
+        totalEarned: d.total_earned ?? d.totalEarned ?? 0,
+        tasksCompleted: d.tasks_completed ?? d.tasksCompleted ?? 0,
+        referralsCount: d.referrals_count ?? d.referralsCount ?? 0,
+        vipReferralsCount: d.vip_referrals_count ?? d.vipReferralsCount ?? 0,
+        referralCode: d.referral_code || d.referralCode || '',
+        loanBalance: d.loan_balance ?? d.loanBalance ?? 0,
+        loanLimit: d.loan_limit ?? d.loanLimit ?? 20000,
+        bankDetails: d.bank_details || { bankName: 'OPay', accountNumber: '', accountName: d.full_name || '' },
+        createdAt: d.created_at || new Date().toISOString(),
+        upgradeStatus: d.upgrade_status || 'NONE',
+        status: d.status || 'ACTIVE'
+      }));
+    } catch {
+      return [];
+    }
+  },
+
+  async fetchAllWithdrawals(): Promise<any[]> {
+    try {
+      const { data, error } = await supabase.from('withdrawals').select('*');
+      if (error || !data) return [];
+      return data;
+    } catch {
+      return [];
+    }
+  }
+};
+

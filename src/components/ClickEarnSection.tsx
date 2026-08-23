@@ -55,6 +55,7 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
   const handleStartTask = (task: SocialTask) => {
     soundManager.playClickSound();
     if (task.isPremiumOnly && user.tier !== 'PREMIUM') {
+      soundManager.speakPremiumLocked();
       onOpenUpgrade();
       return;
     }
@@ -73,7 +74,7 @@ export const ClickEarnSection: React.FC<ClickEarnSectionProps> = ({
   const handleClaim = async () => {
     if (!activeTask || isClaiming) return;
     setIsClaiming(true);
-    soundManager.playRewardSound();
+    soundManager.speakTaskCompleted();
 
     try {
       await onCompleteTask(activeTask.id, 'social');

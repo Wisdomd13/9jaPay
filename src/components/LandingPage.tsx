@@ -188,10 +188,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
             <div className="flex flex-wrap items-center gap-3 sm:gap-4 pt-1">
               <button
                 onClick={() => {
-                  soundManager.playClickSound();
+                  soundManager.speakWelcome();
                   onOpenAuth('register');
                 }}
-                className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] hover:opacity-95 text-black font-black text-xs sm:text-sm shadow-xl shadow-[#7CFF00]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                className="px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl bg-gradient-to-r from-[#7CFF00] via-[#39E600] to-[#00B83D] hover:opacity-95 text-black font-black text-xs sm:text-sm shadow-xl shadow-[#7CFF00]/30 hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <Zap className="w-4 h-4 fill-black" />
                 <span>START EARNING FREE</span>
@@ -203,7 +203,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onOpenAuth }) => {
                   const target = document.getElementById('how-it-works');
                   target?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="px-5 sm:px-6 py-3.5 sm:py-4 rounded-xl bg-[#071A0C] hover:bg-[#063B16]/50 border border-[#7CFF00]/20 text-white font-bold text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
+                className="px-5 sm:px-6 py-3.5 sm:py-4 rounded-xl bg-[#071A0C] hover:bg-[#063B16]/50 border border-[#7CFF00]/20 text-white font-bold text-xs sm:text-sm hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer"
               >
                 <Play className="w-4 h-4 text-[#7CFF00] fill-[#7CFF00]" />
                 <span>HOW IT WORKS</span>

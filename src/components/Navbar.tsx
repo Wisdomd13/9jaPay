@@ -100,7 +100,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 { id: 'videos', label: 'Watch & Earn' },
                 { id: 'quiz', label: 'Daily Quiz (+₦500)' },
                 { id: 'socials', label: 'Click & Earn' },
-                { id: 'referral', label: 'Refer (₦1.5k)' },
+                { id: 'referral', label: 'Referral (+₦10k)' },
                 { id: 'history', label: 'Transactions' },
               ].map((tab) => {
                 const isActive = activeTab === tab.id;
@@ -223,21 +223,31 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </button>
                 )}
 
-                {/* User Menu / Admin Link if Admin */}
+                {/* Admin Portal Shortcut for Admins */}
+                {isUserAdmin && (
+                  <button
+                    onClick={() => {
+                      soundManager.playClickSound();
+                      onOpenAdmin();
+                    }}
+                    className="p-2 rounded-xl bg-[#FFB800]/10 hover:bg-[#FFB800]/20 border border-[#FFB800]/30 text-[#FFB800] transition-colors cursor-pointer"
+                    title="Admin Management Portal"
+                  >
+                    <ShieldCheck className="w-4 h-4" />
+                  </button>
+                )}
+
+                {/* User Profile Avatar with First Name Initial */}
                 <div className="relative group">
                   <button
                     onClick={() => {
                       soundManager.playClickSound();
-                      if (isUserAdmin) onOpenAdmin();
+                      setActiveTab('profile');
                     }}
-                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-[#063B16] via-[#39E600] to-[#7CFF00] border border-[#7CFF00]/40 text-black font-black text-sm flex items-center justify-center hover:opacity-90 shadow-md shadow-[#7CFF00]/20 transition-all"
-                    title={`@${user.username} (${user.fullName})`}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-[#FFB800] via-[#FFD700] to-[#E6A100] border border-[#FFB800]/40 text-black font-black text-sm flex items-center justify-center hover:opacity-90 shadow-md shadow-amber-950/40 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                    title={`View Profile: ${user.fullName || user.username}`}
                   >
-                    {isUserAdmin ? (
-                      <ShieldCheck className="w-4 h-4 text-black" />
-                    ) : (
-                      <span>{userInitial}</span>
-                    )}
+                    <span>{userInitial}</span>
                   </button>
                 </div>
 
@@ -268,9 +278,16 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Mobile Drawer Menu */}
       {isMenuOpen && user && (
         <div className="md:hidden bg-[#071A0C] border-b border-[#7CFF00]/20 px-4 pt-2 pb-6 space-y-2 animate-fadeIn">
-          <div className="p-3 rounded-2xl bg-[#020805] border border-[#7CFF00]/20 flex items-center justify-between mb-2">
+          <div 
+            onClick={() => {
+              soundManager.playClickSound();
+              setActiveTab('profile');
+              setIsMenuOpen(false);
+            }}
+            className="p-3 rounded-2xl bg-[#020805] border border-[#7CFF00]/20 flex items-center justify-between mb-2 cursor-pointer hover:border-[#FFB800]/50 transition-colors"
+          >
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#063B16] via-[#39E600] to-[#7CFF00] text-black font-black text-xs flex items-center justify-center shadow-sm">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#FFB800] via-[#FFD700] to-[#E6A100] text-black font-black text-xs flex items-center justify-center shadow-sm">
                 {userInitial}
               </div>
               <div>
@@ -289,6 +306,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {[
             { id: 'dashboard', label: 'Dashboard' },
+            { id: 'profile', label: 'My Profile' },
             { id: 'videos', label: 'Watch & Earn Videos' },
             { id: 'quiz', label: 'Daily Quiz Challenge' },
             { id: 'socials', label: 'Click & Earn Socials' },

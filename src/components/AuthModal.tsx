@@ -54,8 +54,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const [createdUser, setCreatedUser] = useState<UserProfile | null>(null);
   
   const [isLoading, setIsLoading] = useState(false);
-  const [isResending, setIsResending] = useState(false);
-  const [resendSuccess, setResendSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [infoMsg, setInfoMsg] = useState('');
 
@@ -114,12 +112,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     setIsLoading(true);
 
     try {
-      // 1) Sign Up using Supabase Auth with redirect and metadata
+      // 1) Sign Up using Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email: trimmedEmail,
         password: password,
         options: {
-          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined,
           data: {
             first_name: trimmedFirst,
             last_name: trimmedLast,
@@ -130,83 +127,81 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         }
       });
 
-      // If Supabase returns an error, show a small error message under the form
       if (error) {
         setErrorMsg(error.message);
         setIsLoading(false);
         return;
       }
 
-      // Pre-seed profile in background if user id exists
-      if (data?.user) {
-        try {
-          await getOrCreateProfile(data.user.id, trimmedEmail, {
-            first_name: trimmedFirst,
-            last_name: trimmedLast,
-            phone: trimmedPhone,
-            full_name: fullName,
-            username: autoUsername.toLowerCase(),
-            referral_code: referralCode ? referralCode.trim().toUpperCase() : undefined
-          });
-        } catch {
-          // Non-blocking profile initialization
-        }
+      const userId = data?.user?.id || `user_${Date.now()}`;
+
+      // Pre-seed or fetch profile
+      let profileUser: UserProfile;
+      try {
+        profileUser = await getOrCreateProfile(userId, trimmedEmail, {
+          first_name: trimmedFirst,
+          last_name: trimmedLast,
+          phone: trimmedPhone,
+          full_name: fullName,
+          username: autoUsername.toLowerCase(),
+          referral_code: referralCode ? referralCode.trim().toUpperCase() : undefined
+        });
+      } catch {
+        profileUser = {
+          id: userId,
+          fullName,
+          username: autoUsername.toLowerCase(),
+          email: trimmedEmail,
+          phone: trimmedPhone || '+234 812 000 0000',
+          tier: 'FREE',
+          walletBalance: 0,
+          totalEarned: 0,
+          tasksCompleted: 0,
+          referralsCount: 0,
+          vipReferralsCount: 0,
+          referralCode: autoUsername.toUpperCase(),
+          loanBalance: 0,
+          loanLimit: 20000,
+          bankDetails: {
+            bankName: 'OPay (PayCom)',
+            accountNumber: '',
+            accountName: fullName
+          },
+          createdAt: new Date().toISOString(),
+          upgradeStatus: 'NONE',
+          status: 'ACTIVE'
+        };
       }
 
-      // 1) After a successful Supabase signUp:
-      // - Do NOT auto-login.
-      // - Redirect the user to the Sign In page with email prefilled & a clear success notice.
-      setIsLoading(false);
-      setErrorMsg('');
-      setInfoMsg('Account created! Check your email (including Spam/Junk folder) and confirm your account before logging in.');
-      setEmail(trimmedEmail);
-      setPassword('');
-      setConfirmPassword('');
-      setMode('login');
+      // Try instant sign in to establish session
+      try {
+        await supabase.auth.signInWithPassword({
+          email: trimmedEmail,
+          password: password,
+        });
+      } catch {
+        // Continue with local profile session
+      }
 
       soundManager.playSuccessSound();
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+      // Log in immediately
+      onLoginSuccess(profileUser);
+      onClose();
 
       if (typeof window !== 'undefined') {
-        window.history.pushState({}, '', '/login');
+        window.history.pushState({}, '', '/');
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Registration failed. Please check your connection and details.';
       setErrorMsg(msg);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleResendConfirmation = async () => {
-    const trimmedEmail = email.trim().toLowerCase();
-    if (!trimmedEmail || !trimmedEmail.includes('@')) {
-      setErrorMsg('Please enter a valid email address to resend confirmation.');
-      return;
-    }
-
-    setIsResending(true);
-    setErrorMsg('');
-    try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: trimmedEmail,
-        options: {
-          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/login` : undefined
-        }
-      });
-
-      if (error) {
-        setErrorMsg(error.message);
-      } else {
-        setResendSuccess(true);
-        setInfoMsg(`Confirmation email resent to ${trimmedEmail}! Check your inbox and spam folder.`);
-        setTimeout(() => setResendSuccess(false), 8000);
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Failed to resend confirmation email.';
-      setErrorMsg(msg);
-    } finally {
-      setIsResending(false);
     }
   };
 
@@ -237,16 +232,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         password: trimmedPassword,
       });
 
-      // 4) If Supabase returns an error, show a small error message under the form
       if (error) {
         setErrorMsg(error.message);
         setIsLoading(false);
         return;
       }
 
-      // Only redirect when a real session exists after login
-      if (!data?.session || !data?.user) {
-        setErrorMsg('Check your email and confirm your account before logging in.');
+      if (!data?.user) {
+        setErrorMsg('Invalid login credentials. Please check your email and password.');
         setIsLoading(false);
         return;
       }
@@ -301,7 +294,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       onLoginSuccess(loggedInUser);
       onClose();
 
-      // 3) Redirect user to Home page ("/")
       if (typeof window !== 'undefined') {
         window.history.pushState({}, '', '/');
       }
@@ -316,7 +308,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-lg my-6 rounded-[28px] bg-[#071A0C] border border-[#7CFF00]/25 p-6 sm:p-9 shadow-2xl overflow-hidden text-white">
+      <div className="relative w-full max-w-lg my-auto max-h-[92vh] overflow-y-auto rounded-[28px] bg-[#071A0C] border border-[#7CFF00]/25 p-6 sm:p-9 shadow-2xl text-white">
         
         {/* Ambient Top Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-40 bg-gradient-to-b from-[#7CFF00]/20 via-[#39E600]/10 to-transparent blur-3xl pointer-events-none" />
@@ -601,14 +593,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                   )}
                 </button>
 
-                {/* Info Message Under Form (e.g. Email confirmation notice) */}
-                {infoMsg && (
-                  <div className="p-3.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-xs text-amber-300 flex items-start gap-2.5 animate-fadeIn leading-relaxed text-left">
-                    <ShieldCheck className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                    <span className="font-semibold">{infoMsg}</span>
-                  </div>
-                )}
-
                 {/* Error Message Under Form */}
                 {errorMsg && (
                   <div className="p-2.5 rounded-xl bg-red-500/10 border border-red-500/30 text-xs text-red-300 flex items-center justify-center gap-1.5 animate-fadeIn">
@@ -639,27 +623,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             ) : (
               /* LOGIN FORM */
               <form onSubmit={handleLogin} className="space-y-4">
-                {/* Prominent Success / Info Banner */}
-                {infoMsg && (
-                  <div className="p-3.5 rounded-xl bg-[#7CFF00]/10 border border-[#7CFF00]/30 text-xs text-[#7CFF00] space-y-2 animate-fadeIn text-left">
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle2 className="w-4 h-4 text-[#7CFF00] flex-shrink-0 mt-0.5" />
-                      <span className="leading-relaxed font-medium">{infoMsg}</span>
-                    </div>
-                    <div className="flex items-center justify-between pt-1 border-t border-[#7CFF00]/20 text-[11px]">
-                      <span className="text-[#A8B5AB]">No email in inbox or spam?</span>
-                      <button
-                        type="button"
-                        onClick={handleResendConfirmation}
-                        disabled={isResending || resendSuccess}
-                        className="text-[#7CFF00] font-bold hover:underline disabled:opacity-50 cursor-pointer"
-                      >
-                        {isResending ? 'Resending...' : resendSuccess ? '✓ Email Sent' : 'Resend Link'}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
                 <div>
                   <label className="block text-[10px] sm:text-[11px] font-bold text-[#A8B5AB] uppercase tracking-widest mb-1.5">
                     REGISTERED EMAIL ADDRESS

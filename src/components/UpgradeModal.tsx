@@ -151,7 +151,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
         refNumber,
         receiptImage: receiptImage || undefined
       });
-      soundManager.playSuccessSound();
+      soundManager.speakUpgrade();
       setStep('submitted_success');
       confetti({
         particleCount: 100,
@@ -176,7 +176,7 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-xl my-6 rounded-3xl bg-[#071A0C] border border-[#7CFF00]/30 p-5 sm:p-8 shadow-2xl overflow-hidden text-white">
+      <div className="relative w-full max-w-xl my-auto max-h-[92vh] overflow-y-auto rounded-3xl bg-[#071A0C] border border-[#7CFF00]/30 p-5 sm:p-8 shadow-2xl text-white">
         
         {/* Glow */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-[#7CFF00]/15 rounded-full blur-3xl pointer-events-none" />

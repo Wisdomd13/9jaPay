@@ -89,12 +89,14 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
       });
 
       if (res.isCorrect) {
-        soundManager.playSuccessSound();
+        soundManager.speakQuizCorrect();
         confetti({
           particleCount: 80,
           spread: 60,
           origin: { y: 0.7 }
         });
+      } else {
+        soundManager.speakQuizWrong();
       }
     } catch {
       // Handled
@@ -104,7 +106,7 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
   };
 
   const handleCopyReferral = () => {
-    soundManager.playClickSound();
+    soundManager.speakReferralCopied();
     navigator.clipboard.writeText(referralLink);
     setCopiedLink(true);
     confetti({
@@ -370,7 +372,7 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
               <span className="text-xs text-[#7CFF00] font-bold uppercase tracking-widest flex items-center gap-1">
                 <Gift className="w-3.5 h-3.5" /> Referral Hub
               </span>
-              <span className="text-[10px] text-[#FFB800] font-bold">₦6k on VIP</span>
+              <span className="text-[10px] text-[#FFB800] font-bold">₦10,000 on VIP</span>
             </div>
             
             <p className="text-[11px] text-[#A8B5AB] mb-3">
@@ -391,33 +393,60 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
             </div>
           </div>
 
-          {/* Bottom Fast Upgrade Promo Card */}
-          <div className="bg-gradient-to-br from-[#FFB800]/10 to-[#063B16]/30 border border-[#FFB800]/30 rounded-2xl p-3.5 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-extrabold text-[#FFB800] uppercase flex items-center gap-1">
-                <Crown className="w-3 h-3 fill-[#FFB800]" /> VIP Lifetime Access
-              </span>
-              <span className="text-[10px] text-[#FFB800] font-mono font-bold">₦10,000</span>
-            </div>
-            
-            <div className="text-[11px] text-[#E8F0EA] space-y-1">
-              <p className="text-white font-bold text-xs flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#FFB800]" /> 5x Earnings & ₦50k Loans
-              </p>
-              <p className="text-[10px] text-[#A8B5AB]">Unlock ₦1,000 per video, 10 daily quizzes, and daily payouts.</p>
-            </div>
+          {/* Bottom Fast Upgrade Promo / Premium Status Card */}
+          {user.tier === 'PREMIUM' ? (
+            <div className="bg-gradient-to-br from-[#FFB800]/20 via-[#0E0C15] to-[#063B16]/40 border border-[#FFB800]/50 rounded-2xl p-3.5 space-y-2.5 shadow-lg shadow-amber-950/30">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-black text-[#FFB800] uppercase tracking-wider flex items-center gap-1.5">
+                  <Crown className="w-3.5 h-3.5 fill-[#FFB800]" /> PREMIUM USER
+                </span>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-[#FFB800]/20 text-[#FFB800] border border-[#FFB800]/40">
+                  VIP ACTIVE
+                </span>
+              </div>
+              
+              <div className="text-[11px] text-[#E8F0EA] space-y-1">
+                <p className="text-white font-black text-xs flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#FFB800]" /> All Premium Features Unlocked
+                </p>
+                <p className="text-[10px] text-[#A8B5AB]">
+                  ₦1,000 tasks, 10 daily quizzes, ₦50k collateral-free loan limit & daily withdrawals active.
+                </p>
+              </div>
 
-            <button
-              onClick={() => {
-                soundManager.playClickSound();
-                onOpenUpgrade();
-              }}
-              className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#FFCC33] via-[#FFB800] to-[#D99100] text-black text-xs font-black shadow-md hover:scale-[1.02] transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <Crown className="w-3.5 h-3.5 fill-black" />
-              <span>{user.tier === 'PREMIUM' ? 'VIP Status Active' : 'Upgrade to VIP (Get Details)'}</span>
-            </button>
-          </div>
+              <div className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#FFCC33] via-[#FFB800] to-[#D99100] text-black text-xs font-black shadow-md flex items-center justify-center gap-1.5">
+                <Crown className="w-3.5 h-3.5 fill-black" />
+                <span>Verified Premium User</span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-gradient-to-br from-[#FFB800]/10 to-[#063B16]/30 border border-[#FFB800]/30 rounded-2xl p-3.5 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-extrabold text-[#FFB800] uppercase flex items-center gap-1">
+                  <Crown className="w-3 h-3 fill-[#FFB800]" /> VIP Lifetime Access
+                </span>
+                <span className="text-[10px] text-[#FFB800] font-mono font-bold">₦10,000</span>
+              </div>
+              
+              <div className="text-[11px] text-[#E8F0EA] space-y-1">
+                <p className="text-white font-bold text-xs flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#FFB800]" /> 5x Earnings & ₦50k Loans
+                </p>
+                <p className="text-[10px] text-[#A8B5AB]">Unlock ₦1,000 per video, 10 daily quizzes, and daily payouts.</p>
+              </div>
+
+              <button
+                onClick={() => {
+                  soundManager.playClickSound();
+                  onOpenUpgrade();
+                }}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#FFCC33] via-[#FFB800] to-[#D99100] text-black text-xs font-black shadow-md hover:scale-[1.02] transition-all text-center flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <Crown className="w-3.5 h-3.5 fill-black" />
+                <span>Upgrade to VIP (Get Details)</span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -469,6 +498,67 @@ export const BentoDashboard: React.FC<BentoDashboardProps> = ({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Referral Network Overview Section */}
+      <div className="bg-[#071A0C] rounded-3xl p-6 border border-[#7CFF00]/20 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Users className="w-5 h-5 text-[#7CFF00]" />
+            <div>
+              <h3 className="text-base font-bold text-white font-display">Referral Network & Commissions</h3>
+              <p className="text-xs text-[#A8B5AB]">Track invited members, VIP conversions, and your referral bonuses</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopyReferral}
+              className="px-3.5 py-1.5 rounded-xl bg-[#063B16] hover:bg-[#063B16]/80 text-[#7CFF00] text-xs font-bold border border-[#7CFF00]/30 flex items-center gap-1.5"
+            >
+              {copiedLink ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedLink ? 'Link Copied' : 'Copy Invite Link'}</span>
+            </button>
+            <button
+              onClick={() => onSelectTab('referral')}
+              className="text-xs text-[#7CFF00] hover:text-white font-bold flex items-center gap-1 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10"
+            >
+              <span>Full Hub</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 3 Metric Cards for Referral Network */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="p-4 rounded-2xl bg-[#040F07] border border-white/5 space-y-1">
+            <span className="text-[10px] font-bold uppercase text-[#A8B5AB]">Total Invited Users</span>
+            <p className="text-xl font-black text-white font-mono">{user.referralsCount}</p>
+            <p className="text-[11px] text-[#A8B5AB]">All active referrals</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#040F07] border border-amber-500/20 space-y-1">
+            <span className="text-[10px] font-bold uppercase text-amber-300">Status Breakdown</span>
+            <div className="flex items-center gap-2 pt-0.5">
+              <span className="text-xs font-bold text-amber-300 font-mono">
+                {user.vipReferralsCount || 0} VIP
+              </span>
+              <span className="text-gray-500">•</span>
+              <span className="text-xs font-bold text-gray-400 font-mono">
+                {Math.max(0, user.referralsCount - (user.vipReferralsCount || 0))} Free
+              </span>
+            </div>
+            <p className="text-[11px] text-[#A8B5AB]">Upgraded vs Free users</p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#040F07] border border-[#7CFF00]/20 space-y-1">
+            <span className="text-[10px] font-bold uppercase text-[#7CFF00]">Referral Earnings</span>
+            <p className="text-xl font-black text-[#7CFF00] font-mono">
+              ₦{((user.vipReferralsCount || 0) * 10000).toLocaleString()}
+            </p>
+            <p className="text-[11px] text-[#A8B5AB]">₦10,000 per VIP upgrade</p>
+          </div>
         </div>
       </div>
     </div>

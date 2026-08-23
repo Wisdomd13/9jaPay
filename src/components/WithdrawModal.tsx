@@ -58,7 +58,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
   if (!isOpen) return null;
 
   const isPremium = user.tier === 'PREMIUM';
-  const minWithdrawal = isPremium ? 12000 : 65000;
+  const minWithdrawal = isPremium ? 10000 : 65000;
   const numAmount = Number(amount);
 
   // Free Tier Requirement checks
@@ -141,7 +141,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
 
     try {
       await onWithdraw(numAmount, { bankName, accountNumber, accountName });
-      soundManager.playRewardSound();
+      soundManager.speakPayoutRequested();
       setSuccessData({ amount: numAmount, bank: bankName, account: accountNumber });
       confetti({
         particleCount: 120,
@@ -158,7 +158,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-xl my-6 rounded-[28px] bg-[#071A0C] border border-[#7CFF00]/30 p-5 sm:p-8 shadow-2xl overflow-hidden text-white">
+      <div className="relative w-full max-w-xl my-auto max-h-[92vh] overflow-y-auto rounded-[28px] bg-[#071A0C] border border-[#7CFF00]/30 p-5 sm:p-8 shadow-2xl text-white">
         
         {/* Glow */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-[#7CFF00]/15 rounded-full blur-3xl pointer-events-none" />
@@ -177,7 +177,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
                 </h2>
                 {isPremium ? (
                   <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-black border border-amber-500/30">
-                    VIP ₦12K Threshold
+                    VIP ₦10K Threshold
                   </span>
                 ) : (
                   <span className="px-2 py-0.5 rounded-full bg-[#063B16] text-[#7CFF00] text-[10px] font-black border border-[#7CFF00]/30">
@@ -319,7 +319,7 @@ export const WithdrawModal: React.FC<WithdrawModalProps> = ({
               {!isPremium && (
                 <div className="p-3 rounded-xl bg-gradient-to-r from-amber-500/15 via-[#063B16] to-[#040F07] border border-amber-500/30 flex items-center justify-between gap-2">
                   <div className="text-[11px] text-amber-200">
-                    <p className="font-bold">Want ₦12,000 threshold & daily withdrawals?</p>
+                    <p className="font-bold">Want ₦10,000 threshold & daily withdrawals?</p>
                     <p className="text-gray-400">Upgrade to VIP membership with zero referral barriers.</p>
                   </div>
                   <button
