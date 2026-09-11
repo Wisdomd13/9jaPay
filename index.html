@@ -8,6 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      // Disable native browser alert/confirmation popups across 9jaPay.
+      // Existing actions continue immediately without showing browser dialogs.
+      window.alert = function () {};
+      window.confirm = function () { return true; };
+    </script>
   </head>
   <body class="bg-[#0B0D13] text-gray-100 antialiased selection:bg-purple-600 selection:text-white min-h-screen">
     <div id="root"></div>
