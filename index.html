@@ -3,21 +3,108 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>9jaPay — Watch, Click & Earn Real Cash Daily</title>
-    <meta name="description" content="9jaPay is Nigeria's premier online task, video earning, quiz rewards, and micro-loan platform." />
+    <title>9jaPay — Temporarily Unavailable</title>
+    <meta name="description" content="9jaPay is temporarily unavailable while maintenance is in progress." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;800;900&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,700;1,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <script>
-      // Disable native browser alert/confirmation popups across 9jaPay.
-      // Existing actions continue immediately without showing browser dialogs.
+      // Keep native browser alert/confirmation popups disabled.
       window.alert = function () {};
       window.confirm = function () { return true; };
     </script>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        background: #050608;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        background: #050608;
+        color: #f5f7f6;
+      }
+
+      body {
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        overflow: hidden;
+      }
+
+      .maintenance-shell {
+        width: min(560px, 100%);
+        text-align: center;
+      }
+
+      .brand-mark {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 24px;
+        border-radius: 22px;
+        display: grid;
+        place-items: center;
+        font-family: 'Outfit', sans-serif;
+        font-size: 25px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        color: #ffffff;
+        background: linear-gradient(145deg, #22153d, #0c0d12);
+        border: 1px solid rgba(168, 85, 247, 0.45);
+        box-shadow: 0 18px 55px rgba(124, 58, 237, 0.18);
+      }
+
+      h1 {
+        margin: 0;
+        font-family: 'Outfit', sans-serif;
+        font-size: clamp(28px, 5vw, 42px);
+        line-height: 1.08;
+        font-weight: 800;
+        letter-spacing: -0.035em;
+      }
+
+      p {
+        margin: 14px auto 0;
+        max-width: 460px;
+        color: #9ca3af;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .status-line {
+        margin-top: 26px;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #cbd5e1;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #f59e0b;
+        box-shadow: 0 0 18px rgba(245, 158, 11, 0.65);
+      }
+    </style>
   </head>
-  <body class="bg-[#0B0D13] text-gray-100 antialiased selection:bg-purple-600 selection:text-white min-h-screen">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+  <body>
+    <main class="maintenance-shell" aria-labelledby="maintenance-title">
+      <div class="brand-mark" aria-hidden="true">9P</div>
+      <h1 id="maintenance-title">We’ll be back shortly</h1>
+      <p>9jaPay is temporarily unavailable while maintenance is in progress. Access to user and admin features is disabled for now.</p>
+      <div class="status-line"><span class="dot" aria-hidden="true"></span>Maintenance in progress</div>
+    </main>
   </body>
 </html>
-
