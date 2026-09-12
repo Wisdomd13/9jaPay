@@ -5,10 +5,7 @@ import {
   ArrowUpRight, 
   ArrowDownLeft, 
   Sparkles, 
-  CheckCircle, 
-  Clock, 
-  Zap,
-  Filter
+  CheckCircle
 } from 'lucide-react';
 import { soundManager } from '../utils/audio';
 
@@ -20,51 +17,97 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
   const [filter, setFilter] = useState<string>('ALL');
 
   const filtered = transactions.filter(t => {
+    const type = String(t.type || '').toUpperCase();
     if (filter === 'ALL') return true;
-    if (filter === 'EARNINGS') return t.type === 'TASK_EARN' || t.type === 'QUIZ_EARN' || t.type === 'REFERRAL_BONUS' || t.type === 'WELCOME_BONUS';
-    if (filter === 'WITHDRAWALS') return t.type === 'WITHDRAWAL';
-    if (filter === 'LOANS') return t.type === 'LOAN_DISBURSED' || t.type === 'LOAN_REPAID';
+    if (filter === 'EARNINGS') return ['TASK_EARN', 'QUIZ_EARN', 'REFERRAL_BONUS', 'WELCOME_BONUS', 'TASK_REWARD'].includes(type);
+    if (filter === 'WITHDRAWALS') return type === 'WITHDRAWAL';
+    if (filter === 'LOANS') return type === 'LOAN_DISBURSED' || type === 'LOAN_REPAID';
     return true;
   });
 
   const getTxDetails = (tx: Transaction) => {
-    switch (tx.type) {
-      case 'WITHDRAWAL':
-        return {
-          icon: <ArrowUpRight className="w-5 h-5 text-[#22C55E]" />,
-          bgColor: 'bg-[#063B16] border-[#22C55E]/30',
-          textColor: 'text-[#22C55E]',
-          sign: '-'
-        };
-      case 'UPGRADE_PAYMENT':
-        return {
-          icon: <Sparkles className="w-5 h-5 text-[#FFB800]" />,
-          bgColor: 'bg-[#FFB800]/10 border-[#FFB800]/20',
-          textColor: 'text-[#FFB800]',
-          sign: '-'
-        };
-      case 'LOAN_DISBURSED':
-        return {
-          icon: <ArrowDownLeft className="w-5 h-5 text-[#7CFF00]" />,
-          bgColor: 'bg-[#063B16] border-[#7CFF00]/30',
-          textColor: 'text-[#7CFF00]',
-          sign: '+'
-        };
-      case 'LOAN_REPAID':
-        return {
-          icon: <ArrowUpRight className="w-5 h-5 text-sky-400" />,
-          bgColor: 'bg-sky-500/10 border-sky-500/20',
-          textColor: 'text-sky-400',
-          sign: '-'
-        };
-      default:
-        return {
-          icon: <ArrowDownLeft className="w-5 h-5 text-[#7CFF00]" />,
-          bgColor: 'bg-[#063B16] border-[#7CFF00]/30',
-          textColor: 'text-[#7CFF00]',
-          sign: '+'
-        };
+    const type = String(tx.type || '').toUpperCase();
+    const amount = Number(tx.amount || 0);
+
+    // Debit types must never fall through to the green credit styling.
+    const isDebit = amount < 0 || [
+      'WITHDRAWAL',
+      'UPGRADE_PAYMENT',
+      'VIP_UPGRADE',
+      'LOAN_REPAID',
+      'COURSE_PURCHASE',
+      'LEARNING_COURSE_PURCHASE'
+    ].includes(type);
+
+    if (type === 'UPGRADE_PAYMENT' || type === 'VIP_UPGRADE') {
+      return {
+        icon: <Sparkles className="w-5 h-5 text-[#FFB800]" />,
+        bgColor: 'bg-[#FFB800]/10 border-[#FFB800]/20',
+        textColor: 'text-[#FFB800]',
+        sign: '-',
+        label: 'Upgrade Payment'
+      };
     }
+
+    if (type === 'COURSE_PURCHASE' || type === 'LEARNING_COURSE_PURCHASE') {
+      return {
+        icon: <ArrowUpRight className="w-5 h-5 text-red-400" />,
+        bgColor: 'bg-red-500/10 border-red-500/25',
+        textColor: 'text-red-400',
+        sign: '-',
+        label: '9jaLearn Purchase'
+      };
+    }
+
+    if (type === 'WITHDRAWAL') {
+      return {
+        icon: <ArrowUpRight className="w-5 h-5 text-red-400" />,
+        bgColor: 'bg-red-500/10 border-red-500/25',
+        textColor: 'text-red-400',
+        sign: '-',
+        label: 'Withdrawal'
+      };
+    }
+
+    if (type === 'LOAN_DISBURSED') {
+      return {
+        icon: <ArrowDownLeft className="w-5 h-5 text-[#7CFF00]" />,
+        bgColor: 'bg-[#063B16] border-[#7CFF00]/30',
+        textColor: 'text-[#7CFF00]',
+        sign: '+',
+        label: 'Loan Disbursed'
+      };
+    }
+
+    if (type === 'LOAN_REPAID') {
+      return {
+        icon: <ArrowUpRight className="w-5 h-5 text-red-400" />,
+        bgColor: 'bg-red-500/10 border-red-500/25',
+        textColor: 'text-red-400',
+        sign: '-',
+        label: 'Loan Repayment'
+      };
+    }
+
+    // Amount direction is authoritative for any backend transaction type that
+    // the frontend does not yet explicitly recognise.
+    if (isDebit) {
+      return {
+        icon: <ArrowUpRight className="w-5 h-5 text-red-400" />,
+        bgColor: 'bg-red-500/10 border-red-500/25',
+        textColor: 'text-red-400',
+        sign: '-',
+        label: 'Debit'
+      };
+    }
+
+    return {
+      icon: <ArrowDownLeft className="w-5 h-5 text-[#7CFF00]" />,
+      bgColor: 'bg-[#063B16] border-[#7CFF00]/30',
+      textColor: 'text-[#7CFF00]',
+      sign: '+',
+      label: 'Credit'
+    };
   };
 
   const formatDate = (isoString: string) => {
@@ -79,8 +122,6 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
 
   return (
     <div className="space-y-6">
-      
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
@@ -93,11 +134,10 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
             </span>
           </div>
           <p className="text-xs sm:text-sm text-[#A8B5AB] mt-1">
-            Complete real-time audit log of your task earnings, quiz rewards, referrals, loans, and bank payouts.
+            Complete real-time audit log of your task earnings, quiz rewards, referrals, loans, purchases, and bank payouts.
           </p>
         </div>
 
-        {/* Filter Tabs */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
           {['ALL', 'EARNINGS', 'WITHDRAWALS', 'LOANS'].map((f) => (
             <button
@@ -118,7 +158,6 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
         </div>
       </div>
 
-      {/* Transaction List Card */}
       <div className="rounded-3xl p-4 sm:p-6 bg-[#071A0C] border border-[#7CFF00]/20 shadow-2xl space-y-3">
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-[#A8B5AB] space-y-2">
@@ -128,6 +167,7 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
         ) : (
           filtered.map((tx) => {
             const meta = getTxDetails(tx);
+            const displayAmount = Math.abs(Number(tx.amount || 0));
             return (
               <div
                 key={tx.id}
@@ -138,6 +178,9 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
                     {meta.icon}
                   </div>
                   <div>
+                    <div className="text-[10px] uppercase tracking-wide text-[#A8B5AB] font-semibold mb-0.5">
+                      {meta.label}
+                    </div>
                     <h4 className="text-sm font-bold text-white leading-snug">
                       {tx.description}
                     </h4>
@@ -155,7 +198,7 @@ export const TransactionsHistory: React.FC<TransactionsHistoryProps> = ({ transa
 
                 <div className="text-right flex-shrink-0">
                   <span className={`text-base font-black font-display ${meta.textColor}`}>
-                    {meta.sign}₦{tx.amount.toLocaleString()}
+                    {meta.sign}₦{displayAmount.toLocaleString()}
                   </span>
                   <div className="flex items-center justify-end gap-1 text-[10px] text-[#22C55E] font-semibold mt-0.5">
                     <CheckCircle className="w-3 h-3" />
