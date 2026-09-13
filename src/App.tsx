@@ -458,12 +458,33 @@ export default function App() {
 
   // Admin Approve Upgrade Request
   const handleAdminApprove = async (targetUserId: string, requestId: string) => {
+    const requestToRestore = pendingUpgrades.find(r => r.id === requestId);
+    const requestIndex = pendingUpgrades.findIndex(r => r.id === requestId);
+
+    // Optimistically remove the row immediately. AdminPanel stores the same queue
+    // reference in its current snapshot, so mutating that shared queue before
+    // replacing state makes the next Approve button usable without waiting for
+    // the Supabase round-trip or the subsequent metrics refresh.
+    if (requestIndex !== -1) {
+      pendingUpgrades.splice(requestIndex, 1);
+      setPendingUpgrades([...pendingUpgrades]);
+    } else {
+      setPendingUpgrades(prev => prev.filter(r => r.id !== requestId));
+    }
+
     try {
       await supabaseDb.upgradeUserToPremium(targetUserId, requestId);
-    } catch {
-      // ignore
+    } catch (err) {
+      // Put the request back if persistence fails so the admin can retry.
+      if (requestToRestore) {
+        setPendingUpgrades(prev =>
+          prev.some(r => r.id === requestId) ? prev : [requestToRestore, ...prev]
+        );
+      }
+      console.warn('[Admin] Failed to approve upgrade:', err);
+      throw err;
     }
-    setPendingUpgrades(prev => prev.filter(r => r.id !== requestId));
+
     if (user?.id === targetUserId) {
       setUser(prev => prev ? { ...prev, tier: 'PREMIUM', loanLimit: 50000, upgradeStatus: 'APPROVED' } : null);
       setQuizDailyLimit(10);
