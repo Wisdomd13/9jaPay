@@ -50,7 +50,13 @@ export const isSupabaseConfigured: boolean = true;
 export const supabase = clientInstance;
 
 /**
- * Transforms a Supabase User object into a 9jaPay UserProfile
+ * Transforms a Supabase User object into a 9jaPay UserProfile.
+ *
+ * IMPORTANT: Supabase periodically refreshes access tokens. Those auth events can
+ * supply the same user again. Returning the exact existing profile object when
+ * the user-facing identity fields did not change lets React bail out of an
+ * unnecessary app-wide state update. This keeps the admin portal stable during
+ * background token refreshes without disabling Supabase session renewal.
  */
 export function mapSupabaseUserToProfile(sbUser: User, existingProfile?: UserProfile | null): UserProfile {
   const metadata = sbUser.user_metadata || {};
@@ -63,15 +69,33 @@ export function mapSupabaseUserToProfile(sbUser: User, existingProfile?: UserPro
   const phone = metadata.phone || sbUser.phone || '';
   const referralCode = metadata.referral_code || username.toUpperCase();
 
-  // If user already had local stats / earnings, retain them
+  // If user already had local stats / earnings, retain them.
   if (existingProfile && (existingProfile.id === sbUser.id || existingProfile.email?.toLowerCase() === (sbUser.email || '').toLowerCase())) {
+    const nextId = sbUser.id;
+    const nextFullName = fullName || existingProfile.fullName;
+    const nextUsername = username || existingProfile.username;
+    const nextEmail = sbUser.email || existingProfile.email;
+    const nextPhone = phone || existingProfile.phone;
+
+    // No actual profile change: preserve object identity so background auth token
+    // refresh events do not cause the whole application/admin UI to re-render.
+    if (
+      existingProfile.id === nextId &&
+      existingProfile.fullName === nextFullName &&
+      existingProfile.username === nextUsername &&
+      existingProfile.email === nextEmail &&
+      existingProfile.phone === nextPhone
+    ) {
+      return existingProfile;
+    }
+
     return {
       ...existingProfile,
-      id: sbUser.id,
-      fullName: fullName || existingProfile.fullName,
-      username: username || existingProfile.username,
-      email: sbUser.email || existingProfile.email,
-      phone: phone || existingProfile.phone,
+      id: nextId,
+      fullName: nextFullName,
+      username: nextUsername,
+      email: nextEmail,
+      phone: nextPhone,
     };
   }
 
@@ -139,4 +163,3 @@ export const supabaseDb = {
     }
   }
 };
-
